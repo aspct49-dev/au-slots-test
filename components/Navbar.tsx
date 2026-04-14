@@ -78,6 +78,7 @@ const socialLinks = [
 const navLinks = [
   { name: "HOME", href: "/" },
   { name: "SOCIALS", href: "#", dropdown: true },
+  { name: "REVIEWS", href: "/reviews" },
   { name: "LEADERBOARDS", href: "/leaderboard" },
   { name: "STORE", href: "/points-shop" },
   { name: "HUNTS", href: "/bonus-hunt" },
