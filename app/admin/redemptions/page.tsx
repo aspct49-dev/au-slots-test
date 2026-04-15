@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, CheckCircle, Clock, Loader2, RefreshCw, XCircle, X } from "lucide-react";
+import { ShoppingBag, CheckCircle, Clock, Loader2, RefreshCw, XCircle, X, Mail, MessageCircle } from "lucide-react";
 import type { Redemption } from "@/lib/shopStore";
 
 function timeAgo(ms: number) {
@@ -206,6 +206,27 @@ export default function AdminRedemptions() {
                     </div>
                   )}
                 </div>
+
+                {/* Player delivery info */}
+                {r.infoSubmitted && (
+                  <div className="px-4 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-3 gap-2 border-t border-white/[0.04] mt-1">
+                    <div className="flex items-center gap-1.5">
+                      <Mail size={11} className="text-[#06b6d4]/60 flex-shrink-0" />
+                      <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider">ViperSpin:</span>
+                      <span className="text-xs text-white/55 truncate">{r.viperSpinEmail || "—"}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Mail size={11} className="text-[#4ade80]/60 flex-shrink-0" />
+                      <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider">Zesty:</span>
+                      <span className="text-xs text-white/55 truncate">{r.zestyBetInfo || "—"}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <MessageCircle size={11} className="text-[#5865f2]/60 flex-shrink-0" />
+                      <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider">Discord:</span>
+                      <span className="text-xs text-white/55 truncate">{r.discordUsername || "—"}</span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Rejection reason — shown on already-rejected items */}
                 {r.status === "rejected" && r.rejectionReason && (

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Coins, Package, Lock, CheckCircle, AlertCircle, Loader2, X, MessageCircle } from "lucide-react";
+import { Coins, Package, Lock, CheckCircle, AlertCircle, Loader2, X, Send } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 interface RewardCardProps {
@@ -21,6 +21,9 @@ interface RewardCardProps {
 
 type RedeemState = "idle" | "loading" | "success" | "error";
 
+const inputCls = "w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#00ff87]/40 transition-colors";
+const labelCls = "block text-xs font-bold text-white/40 uppercase tracking-widest mb-1.5";
+
 export default function RewardCard({
   id,
   gameName,
@@ -36,6 +39,10 @@ export default function RewardCard({
   const { user, isLoggedIn, openLoginModal, setPoints } = useAuth();
   const [redeemState, setRedeemState] = useState<RedeemState>("idle");
   const [feedbackMsg, setFeedbackMsg] = useState("");
+  const [redemptionId, setRedemptionId] = useState<string | null>(null);
+  const [infoForm, setInfoForm] = useState({ viperSpinEmail: "", zestyBetInfo: "", discordUsername: "" });
+  const [submittingInfo, setSubmittingInfo] = useState(false);
+  const [infoSubmitted, setInfoSubmitted] = useState(false);
 
   const inventoryPercent = (inventory / maxInventory) * 100;
   const canAfford = isLoggedIn && user ? user.points >= pointCost : false;
@@ -70,15 +77,36 @@ export default function RewardCard({
 
       // Update the points balance in context from the API response
       setPoints(data.points);
+      setRedemptionId(data.redemptionId ?? null);
+      setInfoSubmitted(false);
+      setInfoForm({ viperSpinEmail: "", zestyBetInfo: "", discordUsername: "" });
       setRedeemState("success");
       setFeedbackMsg(data.message ?? "Redeemed!");
-      // Don't auto-reset — keep the success state so the claim modal stays open
-      setTimeout(() => setRedeemState("idle"), 8000);
     } catch {
       setRedeemState("error");
       setFeedbackMsg("Network error. Please try again.");
       setTimeout(() => setRedeemState("idle"), 3000);
     }
+  };
+
+  const submitInfo = async () => {
+    if (!redemptionId) { setInfoSubmitted(true); return; }
+    setSubmittingInfo(true);
+    try {
+      await fetch("/api/points/redeem/info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ redemptionId, ...infoForm }),
+      });
+    } catch { /* silently proceed */ }
+    setSubmittingInfo(false);
+    setInfoSubmitted(true);
+  };
+
+  const closeModal = () => {
+    setRedeemState("idle");
+    setInfoSubmitted(false);
+    setRedemptionId(null);
   };
 
   const buttonContent = () => {
@@ -104,7 +132,7 @@ export default function RewardCard({
 
   return (
     <>
-      {/* Claim instructions modal */}
+      {/* Redemption info modal */}
       <AnimatePresence>
         {redeemState === "success" && (
           <motion.div
@@ -112,7 +140,6 @@ export default function RewardCard({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
-            onClick={() => setRedeemState("idle")}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -121,64 +148,89 @@ export default function RewardCard({
               onClick={e => e.stopPropagation()}
               className="bg-[#111111] border border-[#00ff87]/30 rounded-2xl p-6 max-w-sm w-full shadow-[0_0_40px_rgba(0,255,135,0.15)]"
             >
+              {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-full bg-[#00ff87]/15 border border-[#00ff87]/30 flex items-center justify-center">
                   <CheckCircle size={24} className="text-[#00ff87]" />
                 </div>
-                <button onClick={() => setRedeemState("idle")} className="text-white/30 hover:text-white transition-colors">
-                  <X size={18} />
-                </button>
-              </div>
-              <h3 className="text-white font-black text-lg mb-1">Redemption Confirmed!</h3>
-              <p className="text-[#00ff87] font-semibold text-sm mb-4">
-                {spinCount > 0 ? `${spinCount} free spins on ${gameName}` : gameName}
-              </p>
-
-              <div className="bg-[#1a1a1a] border border-white/[0.08] rounded-xl p-4 mb-4 space-y-3">
-                <p className="text-white/60 text-xs font-bold uppercase tracking-widest">How to claim</p>
-
-                {spinCount === 0 ? (
-                  /* Credits, tips, consoles — Discord ticket only */
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#5865f2]/20 text-[#5865f2] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
-                    <p className="text-white/70 text-sm">
-                      Open a <span className="text-[#5865f2] font-semibold">ticket in our Discord</span> at{" "}
-                      <a href="https://discord.gg/auslots" target="_blank" rel="noopener noreferrer" className="text-[#5865f2] underline underline-offset-2">discord.gg/auslots</a> and our team will process your reward
-                    </p>
-                  </div>
-                ) : (
-                  /* Spin items — Kick chat OR Discord ticket */
-                  <>
-                    <p className="text-white/40 text-xs">Choose either option:</p>
-                    <div className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">A</div>
-                      <p className="text-white/70 text-sm">
-                        Join the <span className="text-[#00ff87] font-semibold">next live stream</span> on Kick and type{" "}
-                        <span className="font-mono bg-white/10 px-1.5 py-0.5 rounded text-white text-xs">!redeem</span> in chat
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-[#5865f2]/20 text-[#5865f2] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">B</div>
-                      <p className="text-white/70 text-sm">
-                        Open a <span className="text-[#5865f2] font-semibold">ticket in our Discord</span> at{" "}
-                        <a href="https://discord.gg/auslots" target="_blank" rel="noopener noreferrer" className="text-[#5865f2] underline underline-offset-2">discord.gg/auslots</a>
-                      </p>
-                    </div>
-                  </>
+                {infoSubmitted && (
+                  <button onClick={closeModal} className="text-white/30 hover:text-white transition-colors">
+                    <X size={18} />
+                  </button>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 text-white/30 text-xs">
-                <MessageCircle size={12} />
-                <span>Your redemption is queued — it won&apos;t expire</span>
-              </div>
+              <h3 className="text-white font-black text-lg mb-1">Redemption Confirmed!</h3>
+              <p className="text-[#00ff87] font-semibold text-sm mb-5">
+                {spinCount > 0 ? `${spinCount} free spins on ${gameName}` : gameName}
+              </p>
 
-              <button
-                onClick={() => setRedeemState("idle")}
-                className="mt-4 w-full py-2.5 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all"
-              >
-                Got it!
-              </button>
+              {infoSubmitted ? (
+                /* Thank-you state */
+                <div className="text-center py-4">
+                  <div className="w-14 h-14 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 flex items-center justify-center mx-auto mb-4">
+                    <Send size={22} className="text-[#00ff87]" />
+                  </div>
+                  <p className="text-white font-black text-base mb-1">You&apos;re all set!</p>
+                  <p className="text-[#00ff87] font-semibold text-sm">Your reward will be with you shortly!</p>
+                  <button
+                    onClick={closeModal}
+                    className="mt-5 w-full py-2.5 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all"
+                  >
+                    Done
+                  </button>
+                </div>
+              ) : (
+                /* Info collection form */
+                <>
+                  <div className="bg-[#1a1a1a] border border-white/[0.06] rounded-xl px-4 py-3 mb-5">
+                    <p className="text-white/50 text-xs leading-relaxed">
+                      To deliver your reward, please provide your account details below. Fill in only what applies to your item.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className={labelCls}>ViperSpin Email</label>
+                      <input
+                        className={inputCls}
+                        type="email"
+                        placeholder="your@email.com"
+                        value={infoForm.viperSpinEmail}
+                        onChange={e => setInfoForm(f => ({ ...f, viperSpinEmail: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Zesty.Bet Email or Username</label>
+                      <input
+                        className={inputCls}
+                        placeholder="email or username"
+                        value={infoForm.zestyBetInfo}
+                        onChange={e => setInfoForm(f => ({ ...f, zestyBetInfo: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Discord Username</label>
+                      <input
+                        className={inputCls}
+                        placeholder="username"
+                        value={infoForm.discordUsername}
+                        onChange={e => setInfoForm(f => ({ ...f, discordUsername: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={submitInfo}
+                    disabled={submittingInfo}
+                    className="mt-5 w-full py-2.5 bg-[#00ff87] hover:bg-[#00e676] disabled:opacity-60 text-black font-black text-sm rounded-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    {submittingInfo
+                      ? <><Loader2 size={14} className="animate-spin" /> Submitting…</>
+                      : <><Send size={14} /> Submit Details</>}
+                  </button>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}

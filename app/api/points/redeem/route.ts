@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
   decrementInventory(itemId);
 
   // Log the redemption
-  addRedemption({
+  const redemption = addRedemption({
     username,
     itemId,
     itemName,
@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     points: newBalance,
+    redemptionId: redemption.id,
     message: `Successfully redeemed ${redeemDesc}!`,
   });
 }

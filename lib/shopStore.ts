@@ -39,6 +39,11 @@ export interface Redemption {
   fulfilledAt?: number;
   rejectedAt?: number;
   rejectionReason?: string;
+  // Player delivery info
+  viperSpinEmail?: string;
+  zestyBetInfo?: string;
+  discordUsername?: string;
+  infoSubmitted?: boolean;
 }
 
 // ── Defaults (used only when no file exists yet) ──────────────────────────────
@@ -144,6 +149,21 @@ export function fulfillRedemption(id: string): Redemption | null {
   if (!r) return null;
   r.status = "fulfilled";
   r.fulfilledAt = Date.now();
+  writeJSON(REDEMPTIONS_FILE, redemptions);
+  return r;
+}
+
+export function updateRedemptionInfo(
+  id: string,
+  info: { viperSpinEmail: string; zestyBetInfo: string; discordUsername: string }
+): Redemption | null {
+  const redemptions = getRedemptions();
+  const r = redemptions.find(r => r.id === id);
+  if (!r) return null;
+  r.viperSpinEmail  = info.viperSpinEmail.trim();
+  r.zestyBetInfo    = info.zestyBetInfo.trim();
+  r.discordUsername = info.discordUsername.trim();
+  r.infoSubmitted   = true;
   writeJSON(REDEMPTIONS_FILE, redemptions);
   return r;
 }
