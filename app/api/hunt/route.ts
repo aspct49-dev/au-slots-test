@@ -1,0 +1,29 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
+import { SessionData, sessionOptions } from "@/lib/session";
+import { getCurrentHunt, getGuessesForHunt, getUserGuess } from "@/lib/huntStore";
+
+export async function GET() {
+  const hunt = getCurrentHunt();
+  if (!hunt) return NextResponse.json(null);
+
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const username = session.user?.username ?? null;
+
+  const guesses = getGuessesForHunt(hunt.id);
+  const myGuess = username ? getUserGuess(hunt.id, username) : null;
+
+  // Find winner guess object if hunt ended
+  let winnerGuess = null;
+  if (hunt.status === "ended" && hunt.winnerGuessId) {
+    winnerGuess = guesses.find(g => g.id === hunt.winnerGuessId) ?? null;
+  }
+
+  return NextResponse.json({
+    hunt,
+    totalGuesses: guesses.length,
+    myGuess,
+    winnerGuess,
+  });
+}

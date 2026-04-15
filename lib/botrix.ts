@@ -1,72 +1,131 @@
 /**
  * Botrix API helpers
  *
- * Botrix is a Kick loyalty/points bot. Get your API key from the Botrix dashboard.
- * Required env vars:
- *   BOTRIX_API_KEY   — your Botrix API key
- *   BOTRIX_CHANNEL   — your Kick channel name (e.g. "auslots")
+ * Botrix sign convention (matches docs):
+ *   points=250   → DEDUCTS 250 from user
+ *   points=-250  → ADDS 250 to user
  *
- * API reference: https://botrix.live (check your dashboard for the exact endpoints)
+ * Required env vars:
+ *   BOTRIX_BID      — secret token (?bid=...)
+ *   BOTRIX_CHANNEL  — Kick channel slug (e.g. "auslots")
  */
 
-const BOTRIX_BASE = "https://api.botrix.live/api";
+const BOTRIX_BASE = "https://botrix.live/api";
 
-export interface BotrixPointsResponse {
-  points: number;
+export interface BotrixLookupResult {
   username: string;
-}
-
-export interface BotrixDeductResponse {
-  success: boolean;
   points: number;
-  message?: string;
+  uid: string | null;
 }
 
-/** Get a viewer's current Botrix points balance */
-export async function getBotrixPoints(username: string): Promise<number> {
+function entryName(e: Record<string, unknown>): string {
+  return String(e.name ?? e.username ?? e.displayName ?? "");
+}
+
+/** Look up a viewer on the Botrix leaderboard. Returns null if not found. */
+export async function lookupBotrixUser(username: string): Promise<BotrixLookupResult | null> {
   const channel = process.env.BOTRIX_CHANNEL!;
-  const key = process.env.BOTRIX_API_KEY!;
+  const url = `${BOTRIX_BASE}/public/leaderboard?platform=kick&user=${encodeURIComponent(channel)}&search=${encodeURIComponent(username)}`;
 
-  const url = `${BOTRIX_BASE}/points/${channel}?username=${encodeURIComponent(username)}&key=${encodeURIComponent(key)}`;
-
-  const res = await fetch(url, {
-    // Disable Next.js caching so we always get live balance
-    cache: "no-store",
-  });
-
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Botrix points fetch failed: ${res.status} ${text}`);
+    throw new Error(`Botrix leaderboard fetch failed: ${res.status} ${text}`);
   }
 
-  const json: BotrixPointsResponse = await res.json();
-  return json.points ?? 0;
+  const json = await res.json();
+
+  let entries: Record<string, unknown>[];
+  if (Array.isArray(json)) {
+    entries = json;
+  } else if (Array.isArray(json?.data)) {
+    entries = json.data;
+  } else if (json && typeof json === "object") {
+    entries = [json as Record<string, unknown>];
+  } else {
+    return null;
+  }
+
+  const entry = entries.find(e => entryName(e).toLowerCase() === username.toLowerCase());
+  if (!entry) return null;
+
+  return {
+    username: entryName(entry),
+    points: Number(entry.points ?? 0),
+    uid: entry.uid ? String(entry.uid) : null,
+  };
 }
 
-/** Deduct points from a viewer's balance (e.g. after redeeming a reward) */
+/** Get a viewer's points balance (returns 0 if not on leaderboard) */
+export async function getBotrixPoints(username: string): Promise<number> {
+  const result = await lookupBotrixUser(username);
+  return result?.points ?? 0;
+}
+
+/** Call the Botrix substractPoints endpoint with a raw points value.
+ *  Positive = deduct, Negative = add (Botrix convention). */
+async function callBotrixPoints(username: string, botrixPoints: number): Promise<void> {
+  const bid = process.env.BOTRIX_BID!;
+  const url = `${BOTRIX_BASE}/extension/substractPoints?name=${encodeURIComponent(username)}&platform=kick&points=${botrixPoints}&bid=${encodeURIComponent(bid)}`;
+
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Botrix API error: ${res.status} ${text}`);
+  }
+
+  const json: { success: boolean } = await res.json();
+  if (!json.success) {
+    throw new Error("Botrix returned success: false — user may have insufficient points");
+  }
+}
+
+/**
+ * ADD points to a user.
+ * Sends a NEGATIVE value to Botrix (negative = add, per docs).
+ */
+export async function addBotrixPoints(username: string, amount: number): Promise<void> {
+  if (amount <= 0) throw new Error("Amount must be positive");
+  await callBotrixPoints(username, -Math.abs(amount)); // negative = add
+}
+
+/**
+ * DEDUCT points from a user.
+ * Sends a POSITIVE value to Botrix (positive = deduct, per docs).
+ */
 export async function deductBotrixPoints(
+  uid: string,
   username: string,
   amount: number
 ): Promise<number> {
-  const channel = process.env.BOTRIX_CHANNEL!;
-  const key = process.env.BOTRIX_API_KEY!;
+  if (amount <= 0) throw new Error("Amount must be positive");
+  const bid = process.env.BOTRIX_BID!;
+  const idParam = uid ? `uid=${encodeURIComponent(uid)}` : `name=${encodeURIComponent(username)}`;
+  const url = `${BOTRIX_BASE}/extension/substractPoints?${idParam}&platform=kick&points=${Math.abs(amount)}&bid=${encodeURIComponent(bid)}`;
 
-  const res = await fetch(`${BOTRIX_BASE}/points/${channel}/remove`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, amount, key }),
-  });
-
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Botrix points deduction failed: ${res.status} ${text}`);
+    throw new Error(`Botrix deduction failed: ${res.status} ${text}`);
   }
 
-  const json: BotrixDeductResponse = await res.json();
-  if (!json.success && json.success !== undefined) {
-    throw new Error(json.message ?? "Botrix deduction returned failure");
-  }
+  const json: { success: boolean } = await res.json();
+  if (!json.success) throw new Error("Insufficient points");
 
-  // Return the remaining balance after deduction
-  return json.points ?? 0;
+  return getBotrixPoints(username);
+}
+
+/** @deprecated kept for compatibility */
+export async function adjustBotrixPointsByName(username: string, amount: number): Promise<boolean> {
+  if (amount > 0) {
+    await addBotrixPoints(username, amount);
+  } else {
+    await deductBotrixPoints("", username, Math.abs(amount));
+  }
+  return true;
+}
+
+/** @deprecated */
+export async function adjustBotrixPoints(uid: string, username: string, amount: number): Promise<void> {
+  await adjustBotrixPointsByName(username, amount);
 }

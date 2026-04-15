@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Coins,
@@ -259,9 +260,32 @@ function HowItWorksSection() {
   );
 }
 
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  access_denied: "You cancelled the Kick login.",
+  missing_params: "Login failed: missing parameters from Kick.",
+  invalid_state: "Login failed: session mismatch (try again).",
+  missing_verifier: "Login failed: PKCE verifier missing (try again).",
+  server_error: "Login failed: server error. Check console for details.",
+};
+
 export default function HomePage() {
+  const searchParams = useSearchParams();
+  const authError = searchParams.get("auth_error");
+  const detail = searchParams.get("detail");
+
   return (
     <div>
+      {authError && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] max-w-lg w-full px-4">
+          <div className="bg-red-900/90 border border-red-500/50 rounded-xl px-5 py-4 text-sm text-red-200 shadow-xl backdrop-blur-sm">
+            <span className="font-bold text-red-400 mr-2">Login Error:</span>
+            {AUTH_ERROR_MESSAGES[authError] ?? authError}
+            {detail && (
+              <div className="mt-1 text-xs text-red-300/70 break-all">{decodeURIComponent(detail)}</div>
+            )}
+          </div>
+        </div>
+      )}
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />

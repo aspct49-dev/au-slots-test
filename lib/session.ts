@@ -13,6 +13,8 @@ export interface SessionData {
   user?: SessionUser;
   /** Temporary OAuth state param — cleared after callback */
   oauthState?: string;
+  /** PKCE code verifier — cleared after callback */
+  codeVerifier?: string;
 }
 
 export const sessionOptions: SessionOptions = {

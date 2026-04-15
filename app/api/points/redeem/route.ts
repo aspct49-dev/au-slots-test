@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { getBotrixPoints, deductBotrixPoints } from "@/lib/botrix";
+import { getShopItems, decrementInventory, addRedemption } from "@/lib/shopStore";
 
 interface RedeemBody {
   itemId: string;
@@ -10,7 +11,6 @@ interface RedeemBody {
   pointCost: number;
 }
 
-/** POST /api/points/redeem — validates balance then deducts points via Botrix */
 export async function POST(req: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
@@ -31,7 +31,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   }
 
+  // Verify item exists and is in stock
+  const items = getShopItems();
+  const item = items.find(i => i.id === itemId);
+  if (!item) {
+    return NextResponse.json({ error: "Item not found" }, { status: 404 });
+  }
+  if (item.inventory <= 0) {
+    return NextResponse.json({ error: "This item is sold out" }, { status: 409 });
+  }
+
   const username = session.user.username;
+  const uid = session.user.id;
 
   // Re-fetch live balance from Botrix to prevent stale-cache exploits
   let currentPoints: number;
@@ -52,23 +63,33 @@ export async function POST(req: NextRequest) {
   // Deduct points via Botrix
   let newBalance: number;
   try {
-    newBalance = await deductBotrixPoints(username, pointCost);
+    newBalance = await deductBotrixPoints(uid, username, pointCost);
   } catch (err) {
     console.error("[Botrix deduction error]", err);
     return NextResponse.json({ error: "Failed to deduct points" }, { status: 502 });
   }
 
+  // Decrement inventory
+  decrementInventory(itemId);
+
+  // Log the redemption
+  addRedemption({
+    username,
+    itemId,
+    itemName,
+    spinCount: item.spinCount,
+    pointCost,
+  });
+
   // Sync the new balance back into the session
   session.user.points = newBalance;
   await session.save();
 
-  console.log(
-    `[Redeem] ${username} redeemed "${itemName}" (${itemId}) for ${pointCost} pts. New balance: ${newBalance}`
-  );
+  console.log(`[Redeem] ${username} redeemed "${itemName}" (${itemId}) for ${pointCost} pts. New balance: ${newBalance}`);
 
   return NextResponse.json({
     ok: true,
     points: newBalance,
-    message: `Successfully redeemed ${itemName}!`,
+    message: `Successfully redeemed ${item.spinCount} spins on ${itemName}!`,
   });
 }

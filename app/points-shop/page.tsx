@@ -1,110 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Coins, Info, ShoppingBag, Monitor, MessageCircle, Target, PartyPopper } from "lucide-react";
+import { Coins, Info, ShoppingBag, Monitor, MessageCircle, Target, PartyPopper, Loader2 } from "lucide-react";
 import { BubbleText } from "@/components/ui/bubble-text";
 import RewardCard from "@/components/RewardCard";
 import PointsBalance from "@/components/PointsBalance";
 import Particles from "@/components/Particles";
-
-const rewardItems = [
-  {
-    id: "1",
-    gameName: "Crazy Ex Girlfriend",
-    provider: "Nolimit City",
-    spinCount: 50,
-    pointCost: 3000,
-    inventory: 87,
-    maxInventory: 100,
-    gradient: "linear-gradient(135deg, #ff6b6b 0%, #c0392b 50%, #8b0000 100%)",
-    providerColor: "#ff6b6b",
-    imageUrl: "/images/crazy-ex-girlfriend.png",
-  },
-  {
-    id: "2",
-    gameName: "Chaos Crew 3",
-    provider: "Hacksaw",
-    spinCount: 50,
-    pointCost: 3000,
-    inventory: 91,
-    maxInventory: 100,
-    gradient: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 50%, #4c1d95 100%)",
-    providerColor: "#a78bfa",
-    imageUrl: "/images/chaos-crew-3.png",
-  },
-  {
-    id: "3",
-    gameName: "Sweet Bonanza 1000",
-    provider: "Pragmatic Play",
-    spinCount: 100,
-    pointCost: 3875,
-    inventory: 45,
-    maxInventory: 100,
-    gradient: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #d97706 100%)",
-    providerColor: "#fbbf24",
-    imageUrl: "/images/sweet-bonanza-1000.png",
-  },
-  {
-    id: "4",
-    gameName: "Gates of Olympus 1000",
-    provider: "Pragmatic Play",
-    spinCount: 100,
-    pointCost: 3875,
-    inventory: 62,
-    maxInventory: 100,
-    gradient: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 40%, #1d4ed8 100%)",
-    providerColor: "#60a5fa",
-    imageUrl: "/images/gates-of-olympus-1000.png",
-  },
-  {
-    id: "5",
-    gameName: "Wanted Dead or Wild",
-    provider: "Hacksaw",
-    spinCount: 75,
-    pointCost: 4500,
-    inventory: 18,
-    maxInventory: 50,
-    gradient: "linear-gradient(135deg, #d4a574 0%, #a0522d 50%, #5c3317 100%)",
-    providerColor: "#d4a574",
-    imageUrl: "/images/wanted-dead-or-wild.png",
-  },
-  {
-    id: "6",
-    gameName: "Sugar Rush 1000",
-    provider: "Pragmatic Play",
-    spinCount: 50,
-    pointCost: 2500,
-    inventory: 33,
-    maxInventory: 100,
-    gradient: "linear-gradient(135deg, #f472b6 0%, #db2777 50%, #9d174d 100%)",
-    providerColor: "#f472b6",
-    imageUrl: "/images/sugar-rush-1000.png",
-  },
-  {
-    id: "7",
-    gameName: "RIP City",
-    provider: "Hacksaw",
-    spinCount: 25,
-    pointCost: 2000,
-    inventory: 75,
-    maxInventory: 100,
-    gradient: "linear-gradient(135deg, #fb923c 0%, #ea580c 50%, #9a3412 100%)",
-    providerColor: "#fb923c",
-    imageUrl: "/images/rip-city.png",
-  },
-  {
-    id: "8",
-    gameName: "Starlight Princess 1000",
-    provider: "Pragmatic Play",
-    spinCount: 100,
-    pointCost: 3875,
-    inventory: 55,
-    maxInventory: 100,
-    gradient: "linear-gradient(135deg, #c084fc 0%, #9333ea 50%, #581c87 100%)",
-    providerColor: "#c084fc",
-    imageUrl: "/images/starlight-princess-1000.png",
-  },
-];
+import type { ShopItem } from "@/lib/shopStore";
 
 function PageHeader() {
   return (
@@ -181,6 +84,16 @@ function HowToEarn() {
 }
 
 export default function PointsShopPage() {
+  const [items, setItems] = useState<ShopItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/shop/items")
+      .then(r => r.json())
+      .then(data => { setItems(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       <PageHeader />
@@ -191,7 +104,7 @@ export default function PointsShopPage() {
           <div>
             <h2 className="text-xl font-black text-white mb-1">Available Rewards</h2>
             <p className="text-white/40 text-sm">
-              {rewardItems.length} items available — Inventory refreshed weekly
+              {loading ? "Loading…" : `${items.length} items available — Inventory refreshed weekly`}
             </p>
           </div>
           <PointsBalance size="md" />
@@ -200,23 +113,29 @@ export default function PointsShopPage() {
         <HowToEarn />
 
         {/* Rewards grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-        >
-          {rewardItems.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.06 }}
-            >
-              <RewardCard {...item} />
-            </motion.div>
-          ))}
-        </motion.div>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 size={32} className="animate-spin text-[#00ff87]/40" />
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          >
+            {items.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.06 }}
+              >
+                <RewardCard {...item} />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
 
         {/* Info note */}
         <motion.div

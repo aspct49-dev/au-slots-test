@@ -5,13 +5,8 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 
-// Kick brand icon
 function KickIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M2 2h20v20H2V2zm4 4v12h3V14l5 4h4l-6-6 6-6h-4l-5 4V6H6z" />
-    </svg>
-  );
+  return <Image src="/images/kick-logo.png" alt="Kick" width={20} height={20} className="object-contain" />;
 }
 
 export default function LoginModal() {

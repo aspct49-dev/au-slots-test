@@ -370,7 +370,7 @@ export default function ReviewsPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] pt-24 pb-20 relative overflow-x-hidden">
-      <Particles count={30} color="#00ff87" size={1.5} speed={0.4} />
+      <Particles count={30} color="0, 255, 135" speed={0.4} />
 
       {/* Subtle top glow */}
       <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#00ff87]/5 blur-[120px] rounded-full" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,6 +15,7 @@ import {
   Youtube,
   Instagram,
   Facebook,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -23,9 +24,7 @@ const socialLinks = [
     name: "Kick",
     href: "https://kick.com/auslots",
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M2 2h20v20H2V2zm4 4v12h3V14l5 4h4l-6-6 6-6h-4l-5 4V6H6z" />
-      </svg>
+      <Image src="/images/kick-logo.png" alt="Kick" width={16} height={16} className="object-contain" />
     ),
     color: "#53fc18",
   },
@@ -87,14 +86,35 @@ const navLinks = [
   { name: "GIVEAWAYS", href: "/giveaways" },
 ];
 
+const ADMIN_USERNAMES = (process.env.NEXT_PUBLIC_ADMIN_USERNAMES ?? "auslots")
+  .split(",").map(u => u.trim().toLowerCase());
+
 export default function Navbar() {
   const pathname = usePathname();
   const { user, isLoggedIn, openLoginModal, logout } = useAuth();
+  const isAdmin = isLoggedIn && ADMIN_USERNAMES.includes(user?.username?.toLowerCase() ?? "");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [socialsOpen, setSocialsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isLive, setIsLive] = useState(false);
   const socialsRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const checkLive = useCallback(async () => {
+    try {
+      const res = await fetch("/api/kick/live-status");
+      const data = await res.json();
+      setIsLive(!!data?.live);
+    } catch {
+      // silently fail — don't show badge if check errors
+    }
+  }, []);
+
+  useEffect(() => {
+    checkLive();
+    const interval = setInterval(checkLive, 60_000); // re-check every 60s
+    return () => clearInterval(interval);
+  }, [checkLive]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -200,21 +220,23 @@ export default function Navbar() {
 
             {/* Right side */}
             <div className="flex items-center gap-3">
-              {/* Live badge */}
-              <a
-                href="https://kick.com/auslots"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 hover:bg-[#00ff87]/20 hover:border-[#00ff87]/40 transition-all duration-200"
-              >
-                <div className="relative w-2 h-2">
-                  <div className="w-2 h-2 rounded-full bg-[#00ff87]" />
-                  <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />
-                </div>
-                <span className="text-[#00ff87] text-xs font-bold tracking-wider">
-                  LIVE NOW
-                </span>
-              </a>
+              {/* Live badge — only shown when actually streaming */}
+              {isLive && (
+                <a
+                  href="https://kick.com/auslots"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 hover:bg-[#00ff87]/20 hover:border-[#00ff87]/40 transition-all duration-200"
+                >
+                  <div className="relative w-2 h-2">
+                    <div className="w-2 h-2 rounded-full bg-[#00ff87]" />
+                    <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />
+                  </div>
+                  <span className="text-[#00ff87] text-xs font-bold tracking-wider">
+                    LIVE NOW
+                  </span>
+                </a>
+              )}
 
               {/* Auth */}
               {isLoggedIn ? (
@@ -252,6 +274,16 @@ export default function Navbar() {
                             {user?.points?.toLocaleString()} points
                           </p>
                         </div>
+                        {isAdmin && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-2 px-4 py-3 hover:bg-[#00ff87]/5 transition-colors text-sm text-[#00ff87] hover:text-[#00ff87] border-b border-white/5"
+                          >
+                            <Shield size={14} />
+                            Admin Panel
+                          </Link>
+                        )}
                         <Link
                           href="/points-shop"
                           onClick={() => setUserMenuOpen(false)}
@@ -356,22 +388,24 @@ export default function Navbar() {
                   </Link>
                 )
               )}
-              <div className="pt-2 border-t border-white/10">
-                <a
-                  href="https://kick.com/auslots"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl"
-                >
-                  <div className="relative w-2 h-2">
-                    <div className="w-2 h-2 rounded-full bg-[#00ff87]" />
-                    <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />
-                  </div>
-                  <span className="text-sm font-bold text-[#00ff87] tracking-wider">
-                    LIVE ON KICK
-                  </span>
-                </a>
-              </div>
+              {isLive && (
+                <div className="pt-2 border-t border-white/10">
+                  <a
+                    href="https://kick.com/auslots"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl"
+                  >
+                    <div className="relative w-2 h-2">
+                      <div className="w-2 h-2 rounded-full bg-[#00ff87]" />
+                      <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />
+                    </div>
+                    <span className="text-sm font-bold text-[#00ff87] tracking-wider">
+                      LIVE ON KICK
+                    </span>
+                  </a>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

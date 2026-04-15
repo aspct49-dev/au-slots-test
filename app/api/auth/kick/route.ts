@@ -7,11 +7,13 @@ import { buildKickAuthUrl, generateOAuthState } from "@/lib/kick";
 export async function GET() {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
-  // Generate a random state and store it in the session for CSRF protection
+  // Generate CSRF state + PKCE code verifier and store both in the session
   const state = generateOAuthState();
+  const { url: authUrl, codeVerifier } = await buildKickAuthUrl(state);
+
   session.oauthState = state;
+  session.codeVerifier = codeVerifier;
   await session.save();
 
-  const authUrl = buildKickAuthUrl(state);
   return NextResponse.redirect(authUrl);
 }

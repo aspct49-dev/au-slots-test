@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Coins, Package, Lock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Coins, Package, Lock, CheckCircle, AlertCircle, Loader2, X, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 interface RewardCardProps {
@@ -72,7 +72,8 @@ export default function RewardCard({
       setPoints(data.points);
       setRedeemState("success");
       setFeedbackMsg(data.message ?? "Redeemed!");
-      setTimeout(() => setRedeemState("idle"), 4000);
+      // Don't auto-reset — keep the success state so the claim modal stays open
+      setTimeout(() => setRedeemState("idle"), 8000);
     } catch {
       setRedeemState("error");
       setFeedbackMsg("Network error. Please try again.");
@@ -102,6 +103,69 @@ export default function RewardCard({
   };
 
   return (
+    <>
+      {/* Claim instructions modal */}
+      <AnimatePresence>
+        {redeemState === "success" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
+            onClick={() => setRedeemState("idle")}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-[#111111] border border-[#00ff87]/30 rounded-2xl p-6 max-w-sm w-full shadow-[0_0_40px_rgba(0,255,135,0.15)]"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-full bg-[#00ff87]/15 border border-[#00ff87]/30 flex items-center justify-center">
+                  <CheckCircle size={24} className="text-[#00ff87]" />
+                </div>
+                <button onClick={() => setRedeemState("idle")} className="text-white/30 hover:text-white transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
+              <h3 className="text-white font-black text-lg mb-1">Redemption Confirmed!</h3>
+              <p className="text-[#00ff87] font-semibold text-sm mb-4">
+                {spinCount > 0 ? `${spinCount} free spins on ${gameName}` : gameName}
+              </p>
+
+              <div className="bg-[#1a1a1a] border border-white/[0.08] rounded-xl p-4 mb-4 space-y-3">
+                <p className="text-white/60 text-xs font-bold uppercase tracking-widest">How to claim</p>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
+                  <p className="text-white/70 text-sm">Join the <span className="text-[#00ff87] font-semibold">next live stream</span> on Kick at kick.com/auslots</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
+                  <p className="text-white/70 text-sm">Type <span className="font-mono bg-white/10 px-1.5 py-0.5 rounded text-white text-xs">!redeem</span> in chat to notify the streamer</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
+                  <p className="text-white/70 text-sm">The streamer will fulfill your bonus spins live on stream</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-white/30 text-xs">
+                <MessageCircle size={12} />
+                <span>Your redemption is queued — it won&apos;t expire</span>
+              </div>
+
+              <button
+                onClick={() => setRedeemState("idle")}
+                className="mt-4 w-full py-2.5 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all"
+              >
+                Got it!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
@@ -128,15 +192,25 @@ export default function RewardCard({
             </h3>
           )}
         </div>
-        <div
-          className="absolute top-3 right-3 px-2 py-1 rounded-lg text-[10px] font-black tracking-wider text-black"
-          style={{ backgroundColor: providerColor }}
-        >
-          {provider.toUpperCase()}
-        </div>
-        <div className="absolute top-3 left-3 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm border border-white/20 text-white text-[10px] font-black tracking-wider">
-          {spinCount} SPINS
-        </div>
+        {provider !== "AUSlots" && (
+          <div
+            className="absolute top-3 right-3 px-2 py-1 rounded-lg text-[10px] font-black tracking-wider max-w-[90px] truncate"
+            style={{
+              backgroundColor: providerColor,
+              color: provider === "Viper Spins" ? "#ffffff" : "#000000",
+            }}
+          >
+            {provider === "Pragmatic Play" ? "PRAGMATIC"
+              : provider === "Nolimit City" ? "NOLIMIT"
+              : provider === "PenguinGaming" ? "PENGUIN"
+              : provider.toUpperCase()}
+          </div>
+        )}
+        {spinCount > 0 && (
+          <div className="absolute top-3 left-3 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm border border-white/20 text-white text-[10px] font-black tracking-wider">
+            {spinCount} SPINS
+          </div>
+        )}
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#111111] to-transparent" />
       </div>
 
@@ -144,7 +218,11 @@ export default function RewardCard({
       <div className="p-5">
         <div className="mb-4">
           <h3 className="text-white font-bold text-base leading-tight mb-1">{gameName}</h3>
-          <p className="text-white/40 text-xs font-medium">{provider}</p>
+          {provider !== "AUSlots" && (
+            <p className="text-xs font-medium" style={{ color: provider === "Zesty.Bet" ? "#4ade80" : provider === "Viper Spins" ? "#06b6d4" : "rgba(255,255,255,0.4)" }}>
+              {provider}
+            </p>
+          )}
         </div>
 
         {/* Inventory bar */}
@@ -223,5 +301,6 @@ export default function RewardCard({
         </AnimatePresence>
       </div>
     </motion.div>
+    </>
   );
 }
