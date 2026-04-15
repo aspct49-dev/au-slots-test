@@ -122,7 +122,7 @@
   {
     "id": "11",
     "gameName": "$10 Credit",
-    "provider": "Viper Spins",
+    "provider": "ViperSpin",
     "spinCount": 0,
     "pointCost": 5500,
     "inventory": 99,
@@ -134,10 +134,10 @@
   {
     "id": "12",
     "gameName": "$25 Credit",
-    "provider": "Viper Spins",
+    "provider": "ViperSpin",
     "spinCount": 0,
     "pointCost": 8000,
-    "inventory": 99,
+    "inventory": 98,
     "maxInventory": 100,
     "gradient": "linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #4f46e5 100%)",
     "providerColor": "#06b6d4",
@@ -182,7 +182,7 @@
   {
     "id": "16",
     "gameName": "$35 Credit",
-    "provider": "Viper Spins",
+    "provider": "ViperSpin",
     "spinCount": 0,
     "pointCost": 11250,
     "inventory": 98,
@@ -194,7 +194,7 @@
   {
     "id": "17",
     "gameName": "$50 Credit",
-    "provider": "Viper Spins",
+    "provider": "ViperSpin",
     "spinCount": 0,
     "pointCost": 15750,
     "inventory": 92,
@@ -230,7 +230,7 @@
   {
     "id": "20",
     "gameName": "$100 Credit",
-    "provider": "Viper Spins",
+    "provider": "ViperSpin",
     "spinCount": 0,
     "pointCost": 35000,
     "inventory": 75,
@@ -242,7 +242,7 @@
   {
     "id": "21",
     "gameName": "$200 Credit",
-    "provider": "Viper Spins",
+    "provider": "ViperSpin",
     "spinCount": 0,
     "pointCost": 60000,
     "inventory": 49,
@@ -278,7 +278,7 @@
   {
     "id": "24",
     "gameName": "$500 Credit",
-    "provider": "Viper Spins",
+    "provider": "ViperSpin",
     "spinCount": 0,
     "pointCost": 125000,
     "inventory": 5,
@@ -290,7 +290,7 @@
   {
     "id": "25",
     "gameName": "$1000 Credit",
-    "provider": "Viper Spins",
+    "provider": "ViperSpin",
     "spinCount": 0,
     "pointCost": 250000,
     "inventory": 5,

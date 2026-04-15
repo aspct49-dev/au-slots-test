@@ -35,8 +35,10 @@ export interface Redemption {
   spinCount: number;
   pointCost: number;
   redeemedAt: number;        // unix ms
-  status: "pending" | "fulfilled";
+  status: "pending" | "fulfilled" | "rejected";
   fulfilledAt?: number;
+  rejectedAt?: number;
+  rejectionReason?: string;
 }
 
 // ── Defaults (used only when no file exists yet) ──────────────────────────────
@@ -142,6 +144,17 @@ export function fulfillRedemption(id: string): Redemption | null {
   if (!r) return null;
   r.status = "fulfilled";
   r.fulfilledAt = Date.now();
+  writeJSON(REDEMPTIONS_FILE, redemptions);
+  return r;
+}
+
+export function rejectRedemption(id: string, reason: string): Redemption | null {
+  const redemptions = getRedemptions();
+  const r = redemptions.find(r => r.id === id);
+  if (!r) return null;
+  r.status = "rejected";
+  r.rejectedAt = Date.now();
+  r.rejectionReason = reason.trim() || "No reason provided";
   writeJSON(REDEMPTIONS_FILE, redemptions);
   return r;
 }

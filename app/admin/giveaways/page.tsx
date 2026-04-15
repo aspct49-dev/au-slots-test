@@ -13,23 +13,29 @@ const KICK_CHATROOM_ID = process.env.NEXT_PUBLIC_KICK_CHATROOM_ID
   : null;
 const PUSHER_KEY = "32cbd69e4b950bf97679";
 
+const ITEM_W  = 140;
+const VISIBLE = 5;
+const CENTER  = 2; // Math.floor(VISIBLE / 2)
+
 export default function AdminGiveaways() {
-  const [keyword, setKeyword]             = useState("!enter");
-  const [isListening, setIsListening]     = useState(false);
-  const [entries, setEntries]             = useState<Entry[]>([]);
-  const [winner, setWinner]               = useState<string | null>(null);
+  const [keyword, setKeyword]               = useState("!enter");
+  const [isListening, setIsListening]       = useState(false);
+  const [entries, setEntries]               = useState<Entry[]>([]);
+  const [winner, setWinner]                 = useState<string | null>(null);
   const [winnerMessages, setWinnerMessages] = useState<ChatMessage[]>([]);
-  const [isSpinning, setIsSpinning]       = useState(false);
-  const [spinDisplay, setSpinDisplay]     = useState("");
-  const [wsStatus, setWsStatus]           = useState<"disconnected" | "connecting" | "connected" | "error">("disconnected");
+  const [isSpinning, setIsSpinning]         = useState(false);
+  const [spinStrip, setSpinStrip]           = useState<string[]>([]);
+  const [spinTargetX, setSpinTargetX]       = useState(0);
+  const [spinKey, setSpinKey]               = useState(0);
+  const [wsStatus, setWsStatus]             = useState<"disconnected" | "connecting" | "connected" | "error">("disconnected");
 
   // Refs so WebSocket handler always reads current values (avoids stale closure)
-  const isListeningRef = useRef(false);
-  const keywordRef     = useRef("!enter");
-  const winnerRef      = useRef<string | null>(null);
-  const wsRef          = useRef<WebSocket | null>(null);
-  const spinRef        = useRef<ReturnType<typeof setInterval> | null>(null);
-  const chatroomIdRef  = useRef<number | null>(null);
+  const isListeningRef  = useRef(false);
+  const keywordRef      = useRef("!enter");
+  const winnerRef       = useRef<string | null>(null);
+  const wsRef           = useRef<WebSocket | null>(null);
+  const spinWinnerRef   = useRef<string>("");
+  const chatroomIdRef   = useRef<number | null>(null);
 
   // Keep refs in sync with state
   useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
@@ -121,44 +127,55 @@ export default function AdminGiveaways() {
   const startListening = async () => {
     if (wsStatus !== "connected") {
       const ok = await connectChat();
-      if (!ok) return; // don't start listening if connection failed
+      if (!ok) return;
     }
     setIsListening(true);
   };
 
   const stopListening = () => setIsListening(false);
 
-  // ── Spinner ──────────────────────────────────────────────────────────────────
+  // ── Horizontal slot-machine spinner ─────────────────────────────────────────
   const spin = () => {
     if (entries.length === 0 || isSpinning) return;
     setIsSpinning(true);
     setWinner(null);
     setWinnerMessages([]);
-    const names    = entries.map(e => e.username);
-    let ticks      = 0;
-    const maxTicks = 40 + Math.floor(Math.random() * 20);
-    if (spinRef.current) clearInterval(spinRef.current);
-    spinRef.current = setInterval(() => {
-      setSpinDisplay(names[Math.floor(Math.random() * names.length)]);
-      ticks++;
-      if (ticks >= maxTicks) {
-        clearInterval(spinRef.current!);
-        const picked = names[Math.floor(Math.random() * names.length)];
-        setSpinDisplay(picked);
-        setWinner(picked);
-        setIsSpinning(false);
-      }
-    }, 80);
+
+    const names  = entries.map(e => e.username);
+    const rand   = () => names[Math.floor(Math.random() * names.length)];
+    const picked = rand();
+    spinWinnerRef.current = picked;
+
+    // Build strip: CENTER pre-pad + 70 random names + winner + CENTER post-pad
+    const prepad  = Array.from({ length: CENTER }, rand);
+    const middle  = Array.from({ length: 70 }, rand);
+    const postpad = Array.from({ length: CENTER }, rand);
+    const strip   = [...prepad, ...middle, picked, ...postpad];
+
+    const winnerIdx = CENTER + middle.length; // index of winner in strip
+    const targetX   = -(winnerIdx - CENTER) * ITEM_W;
+
+    setSpinStrip(strip);
+    setSpinTargetX(targetX);
+    setSpinKey(k => k + 1);
+  };
+
+  const handleAnimationComplete = () => {
+    if (isSpinning) {
+      setWinner(spinWinnerRef.current);
+      setIsSpinning(false);
+    }
   };
 
   // Cleanup on unmount
   useEffect(() => () => {
-    spinRef.current && clearInterval(spinRef.current);
     disconnectChat();
   }, [disconnectChat]);
 
   const STATUS_COLOR = { disconnected: "text-white/30", connecting: "text-yellow-400", connected: "text-[#00ff87]", error: "text-red-400" };
   const STATUS_LABEL = { disconnected: "Disconnected", connecting: "Connecting…", connected: "Live", error: "Connection Error" };
+
+  const containerW = VISIBLE * ITEM_W; // 700px
 
   return (
     <div className="space-y-6">
@@ -238,7 +255,7 @@ export default function AdminGiveaways() {
                 <Shuffle size={15} /> SPIN ({entries.length} {entries.length === 1 ? "entry" : "entries"})
               </button>
               <button
-                onClick={() => { setEntries([]); setWinner(null); setWinnerMessages([]); setSpinDisplay(""); }}
+                onClick={() => { setEntries([]); setWinner(null); setWinnerMessages([]); setSpinStrip([]); }}
                 className="flex items-center justify-center gap-2 py-2 bg-white/5 hover:bg-white/10 text-white/30 font-semibold text-xs rounded-xl transition-all"
               >
                 <Trash2 size={12} /> Clear All
@@ -272,26 +289,52 @@ export default function AdminGiveaways() {
         {/* Spinner + Winner */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 flex flex-col items-center justify-center min-h-[200px]">
-            {isSpinning || spinDisplay ? (
-              <motion.div
-                key={spinDisplay}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`text-3xl font-black tracking-tight ${isSpinning ? "text-white/60" : "text-[#00ff87]"}`}
-              >
-                {spinDisplay}
-              </motion.div>
+            {spinStrip.length > 0 ? (
+              <div className="w-full flex flex-col items-center gap-4">
+                {/* Slot machine strip */}
+                <div
+                  className="relative overflow-hidden"
+                  style={{ width: containerW, height: 72 }}
+                >
+                  {/* Left fade */}
+                  <div className="absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-[#111111] to-transparent z-10 pointer-events-none" />
+                  {/* Right fade */}
+                  <div className="absolute right-0 top-0 h-full w-20 bg-gradient-to-l from-[#111111] to-transparent z-10 pointer-events-none" />
+                  {/* Center highlight */}
+                  <div
+                    className="absolute top-0 h-full z-10 pointer-events-none border-2 border-[#00ff87]/50 rounded-xl bg-[#00ff87]/5"
+                    style={{ left: CENTER * ITEM_W, width: ITEM_W }}
+                  />
+
+                  {/* Animated strip */}
+                  <motion.div
+                    key={spinKey}
+                    className="flex absolute top-0 left-0"
+                    initial={{ x: 0 }}
+                    animate={{ x: spinTargetX }}
+                    transition={{ duration: 4.5, ease: [0.12, 0.8, 0.15, 1.0] }}
+                    onAnimationComplete={handleAnimationComplete}
+                  >
+                    {spinStrip.map((name, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-center flex-shrink-0 h-[72px] px-2"
+                        style={{ width: ITEM_W }}
+                      >
+                        <span className="text-sm font-bold text-white/70 truncate max-w-full text-center">
+                          {name}
+                        </span>
+                      </div>
+                    ))}
+                  </motion.div>
+                </div>
+
+                {isSpinning && (
+                  <p className="text-white/30 text-xs tracking-widest uppercase animate-pulse">Spinning…</p>
+                )}
+              </div>
             ) : (
               <p className="text-white/20 text-sm">Add entries and press SPIN</p>
-            )}
-            {isSpinning && (
-              <div className="mt-4 w-8 h-1 bg-[#00ff87]/30 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-[#00ff87] rounded-full"
-                  animate={{ x: ["-100%", "100%"] }}
-                  transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }}
-                />
-              </div>
             )}
           </div>
 

@@ -215,7 +215,7 @@ export default function RewardCard({
             className="absolute top-3 right-3 px-2 py-1 rounded-lg text-[10px] font-black tracking-wider max-w-[90px] truncate"
             style={{
               backgroundColor: providerColor,
-              color: provider === "Viper Spins" ? "#ffffff" : "#000000",
+              color: provider === "ViperSpin" ? "#ffffff" : "#000000",
             }}
           >
             {provider === "Pragmatic Play" ? "PRAGMATIC"
@@ -237,7 +237,7 @@ export default function RewardCard({
         <div className="mb-4">
           <h3 className="text-white font-bold text-base leading-tight mb-1">{gameName}</h3>
           {provider !== "AUSlots" && (
-            <p className="text-xs font-medium" style={{ color: provider === "Zesty.Bet" ? "#4ade80" : provider === "Viper Spins" ? "#06b6d4" : "rgba(255,255,255,0.4)" }}>
+            <p className="text-xs font-medium" style={{ color: provider === "Zesty.Bet" ? "#4ade80" : provider === "ViperSpin" ? "#06b6d4" : "rgba(255,255,255,0.4)" }}>
               {provider}
             </p>
           )}
