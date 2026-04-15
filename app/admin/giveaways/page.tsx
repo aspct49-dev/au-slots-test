@@ -68,17 +68,20 @@ export default function AdminGiveaways() {
   useEffect(() => { keywordRef.current = keyword; }, [keyword]);
   useEffect(() => { winnerRef.current = winner; }, [winner]);
 
-  // Fetch avatar for each new entry
+  // Fetch avatar for each new entry — directly from Kick (browser request bypasses Cloudflare)
   useEffect(() => {
     entries.forEach(async (entry) => {
       const key = entry.username.toLowerCase();
       if (fetchingRef.current.has(key)) return;
       fetchingRef.current.add(key);
       try {
-        const res = await fetch(`/api/kick/avatar?username=${encodeURIComponent(entry.username)}`);
+        const res = await fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(entry.username)}`, {
+          headers: { Accept: "application/json" },
+        });
         const data = await res.json();
-        if (data.avatarUrl) {
-          setAvatars(prev => ({ ...prev, [key]: data.avatarUrl }));
+        const avatarUrl: string | null = data?.user?.profile_pic ?? data?.user?.profile_picture ?? null;
+        if (avatarUrl) {
+          setAvatars(prev => ({ ...prev, [key]: avatarUrl }));
         }
       } catch { /* silently fall back to initials */ }
     });
