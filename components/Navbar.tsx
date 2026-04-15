@@ -98,15 +98,20 @@ export default function Navbar() {
   const socialsRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
+  const KICK_CHANNEL = process.env.NEXT_PUBLIC_KICK_CHANNEL ?? "auslots";
+
   const checkLive = useCallback(async () => {
     try {
-      const res = await fetch("/api/kick/live-status");
+      const res = await fetch(`https://kick.com/api/v2/channels/${KICK_CHANNEL}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) return;
       const data = await res.json();
-      setIsLive(!!data?.live);
+      setIsLive(!!data?.livestream);
     } catch {
-      // silently fail — don't show badge if check errors
+      // silently ignore
     }
-  }, []);
+  }, [KICK_CHANNEL]);
 
   useEffect(() => {
     checkLive();
@@ -218,23 +223,28 @@ export default function Navbar() {
 
             {/* Right side */}
             <div className="flex items-center gap-3">
-              {/* Live badge — only shown when actually streaming */}
-              {isLive && (
-                <a
-                  href="https://kick.com/auslots"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 hover:bg-[#00ff87]/20 hover:border-[#00ff87]/40 transition-all duration-200"
-                >
-                  <div className="relative w-2 h-2">
-                    <div className="w-2 h-2 rounded-full bg-[#00ff87]" />
-                    <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />
-                  </div>
-                  <span className="text-[#00ff87] text-xs font-bold tracking-wider">
-                    LIVE NOW
-                  </span>
-                </a>
-              )}
+              {/* Live button — always visible, glows when streaming */}
+              <a
+                href="https://kick.com/auslots"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-500 ${
+                  isLive
+                    ? "bg-[#00ff87]/15 border-[#00ff87]/50 hover:bg-[#00ff87]/25"
+                    : "bg-white/[0.03] border-white/10 hover:border-white/20"
+                }`}
+                style={isLive ? { boxShadow: "0 0 12px rgba(0,255,135,0.4), 0 0 28px rgba(0,255,135,0.15)" } : {}}
+              >
+                <div className="relative w-2 h-2 flex-shrink-0">
+                  <div className={`w-2 h-2 rounded-full ${isLive ? "bg-[#00ff87]" : "bg-white/25"}`} />
+                  {isLive && <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-70" />}
+                </div>
+                <span className={`text-xs font-bold tracking-wider transition-all duration-500 ${
+                  isLive ? "text-[#00ff87] drop-shadow-[0_0_6px_rgba(0,255,135,0.9)]" : "text-white/30"
+                }`}>
+                  {isLive ? "LIVE NOW" : "OFFLINE"}
+                </span>
+              </a>
 
               {/* Auth */}
               {isLoggedIn ? (
@@ -386,24 +396,27 @@ export default function Navbar() {
                   </Link>
                 )
               )}
-              {isLive && (
-                <div className="pt-2 border-t border-white/10">
-                  <a
-                    href="https://kick.com/auslots"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl"
-                  >
-                    <div className="relative w-2 h-2">
-                      <div className="w-2 h-2 rounded-full bg-[#00ff87]" />
-                      <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />
-                    </div>
-                    <span className="text-sm font-bold text-[#00ff87] tracking-wider">
-                      LIVE ON KICK
-                    </span>
-                  </a>
-                </div>
-              )}
+              <div className="pt-2 border-t border-white/10">
+                <a
+                  href="https://kick.com/auslots"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-500 ${
+                    isLive
+                      ? "bg-[#00ff87]/10 border-[#00ff87]/30"
+                      : "bg-white/[0.02] border-white/10"
+                  }`}
+                  style={isLive ? { boxShadow: "0 0 10px rgba(0,255,135,0.2)" } : {}}
+                >
+                  <div className="relative w-2 h-2">
+                    <div className={`w-2 h-2 rounded-full ${isLive ? "bg-[#00ff87]" : "bg-white/25"}`} />
+                    {isLive && <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />}
+                  </div>
+                  <span className={`text-sm font-bold tracking-wider ${isLive ? "text-[#00ff87] drop-shadow-[0_0_6px_rgba(0,255,135,0.8)]" : "text-white/30"}`}>
+                    {isLive ? "LIVE ON KICK" : "OFFLINE"}
+                  </span>
+                </a>
+              </div>
             </div>
           </motion.div>
         )}

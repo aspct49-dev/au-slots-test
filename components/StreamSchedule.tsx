@@ -1,78 +1,21 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Clock, Calendar } from "lucide-react";
 import { BubbleText } from "@/components/ui/bubble-text";
-
-const scheduleData = [
-  {
-    day: "MON",
-    fullDay: "Monday",
-    streamer: "AUSlots",
-    time: "7PM AEST",
-    type: "Main Stream",
-    color: "#00ff87",
-    isMain: true,
-  },
-  {
-    day: "TUE",
-    fullDay: "Tuesday",
-    streamer: "Guest Streamer",
-    time: "8PM AEST",
-    type: "Guest Night",
-    color: "#a78bfa",
-    isMain: false,
-  },
-  {
-    day: "WED",
-    fullDay: "Wednesday",
-    streamer: "AUSlots",
-    time: "7PM AEST",
-    type: "Main Stream",
-    color: "#00ff87",
-    isMain: true,
-  },
-  {
-    day: "THU",
-    fullDay: "Thursday",
-    streamer: "Guest Streamer",
-    time: "8PM AEST",
-    type: "Guest Night",
-    color: "#a78bfa",
-    isMain: false,
-  },
-  {
-    day: "FRI",
-    fullDay: "Friday",
-    streamer: "AUSlots",
-    time: "7PM AEST",
-    type: "Main Stream",
-    color: "#00ff87",
-    isMain: true,
-  },
-  {
-    day: "SAT",
-    fullDay: "Saturday",
-    streamer: "AUSlots",
-    time: "6PM AEST",
-    type: "Big Hunt Night",
-    color: "#fbbf24",
-    isMain: false,
-    special: true,
-  },
-  {
-    day: "SUN",
-    fullDay: "Sunday",
-    streamer: "—",
-    time: "Rest Day",
-    type: "Off",
-    color: "#ffffff",
-    isMain: false,
-    off: true,
-  },
-];
+import type { StreamDay } from "@/lib/scheduleStore";
 
 export default function StreamSchedule() {
+  const [scheduleData, setScheduleData] = useState<StreamDay[]>([]);
+
+  useEffect(() => {
+    fetch("/api/schedule", { cache: "no-store" })
+      .then(r => r.json())
+      .then(setScheduleData)
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="py-12 sm:py-20 relative">
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8">

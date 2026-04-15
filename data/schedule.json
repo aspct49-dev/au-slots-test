@@ -1,0 +1,67 @@
+[
+  {
+    "day": "MON",
+    "fullDay": "Monday",
+    "streamer": "AUSlots",
+    "time": "7PM AEST :)",
+    "type": "Main Stream",
+    "color": "#00ff87",
+    "isMain": true
+  },
+  {
+    "day": "TUE",
+    "fullDay": "Tuesday",
+    "streamer": "AUSlots",
+    "time": "7PM AEST",
+    "type": "Main Stream",
+    "color": "#00ff87",
+    "isMain": true
+  },
+  {
+    "day": "WED",
+    "fullDay": "Wednesday",
+    "streamer": "AUSlots",
+    "time": "7PM AEST",
+    "type": "Main Stream",
+    "color": "#00ff87",
+    "isMain": true
+  },
+  {
+    "day": "THU",
+    "fullDay": "Thursday",
+    "streamer": "AUSlots",
+    "time": "7PM AEST",
+    "type": "Big Hunt Night",
+    "color": "#fbbf24",
+    "isMain": true,
+    "special": true
+  },
+  {
+    "day": "FRI",
+    "fullDay": "Friday",
+    "streamer": "AUSlots",
+    "time": "7PM AEST",
+    "type": "Main Stream",
+    "color": "#00ff87",
+    "isMain": true
+  },
+  {
+    "day": "SAT",
+    "fullDay": "Saturday",
+    "streamer": "Guest Streamer",
+    "time": "TBD",
+    "type": "Guest Night",
+    "color": "#a78bfa",
+    "isMain": false
+  },
+  {
+    "day": "SUN",
+    "fullDay": "Sunday",
+    "streamer": "–",
+    "time": "–",
+    "type": "Rest Day",
+    "color": "#444444",
+    "isMain": false,
+    "off": true
+  }
+]

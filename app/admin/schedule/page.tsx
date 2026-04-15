@@ -1,30 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Save } from "lucide-react";
-
-interface StreamDay {
-  day: string;
-  fullDay: string;
-  streamer: string;
-  time: string;
-  type: string;
-  color: string;
-  isMain: boolean;
-  special?: boolean;
-  off?: boolean;
-}
-
-const defaultSchedule: StreamDay[] = [
-  { day: "MON", fullDay: "Monday",    streamer: "AUSlots", time: "7PM AEST", type: "Main Stream",   color: "#00ff87", isMain: true },
-  { day: "TUE", fullDay: "Tuesday",   streamer: "AUSlots", time: "7PM AEST", type: "Main Stream",   color: "#00ff87", isMain: true },
-  { day: "WED", fullDay: "Wednesday", streamer: "AUSlots", time: "7PM AEST", type: "Main Stream",   color: "#00ff87", isMain: true },
-  { day: "THU", fullDay: "Thursday",  streamer: "AUSlots", time: "7PM AEST", type: "Big Hunt Night", color: "#fbbf24", isMain: true, special: true },
-  { day: "FRI", fullDay: "Friday",    streamer: "AUSlots", time: "7PM AEST", type: "Main Stream",   color: "#00ff87", isMain: true },
-  { day: "SAT", fullDay: "Saturday",  streamer: "Guest Streamer", time: "TBD", type: "Guest Night", color: "#a78bfa", isMain: false },
-  { day: "SUN", fullDay: "Sunday",    streamer: "–",       time: "–",        type: "Rest Day",      color: "#444444", isMain: false, off: true },
-];
+import type { StreamDay } from "@/lib/scheduleStore";
 
 const PRESET_COLORS = ["#00ff87", "#fbbf24", "#a78bfa", "#f87171", "#38bdf8", "#fb923c", "#444444"];
 
@@ -32,15 +11,38 @@ const inputCls = "w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-3 py-
 const labelCls = "block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1";
 
 export default function AdminSchedule() {
-  const [schedule, setSchedule] = useState<StreamDay[]>(defaultSchedule);
+  const [schedule, setSchedule] = useState<StreamDay[]>([]);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/schedule", { cache: "no-store" })
+      .then(r => r.json())
+      .then(data => { setSchedule(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
   const update = (i: number, key: keyof StreamDay, val: string | boolean) => {
     setSchedule(p => p.map((d, idx) => idx === i ? { ...d, [key]: val } : d));
     setSaved(false);
   };
 
-  const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
+  const save = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/schedule", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(schedule),
+      });
+      if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="text-white/40 text-sm p-8 text-center">Loading schedule…</div>;
 
   return (
     <div className="space-y-6">
@@ -49,8 +51,8 @@ export default function AdminSchedule() {
           <h1 className="text-2xl font-black text-white flex items-center gap-2"><Calendar size={20} className="text-[#38bdf8]" /> Stream Schedule</h1>
           <p className="text-white/40 text-sm mt-0.5">Edit the 7-day stream schedule</p>
         </div>
-        <button onClick={save} className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm rounded-xl transition-all ${saved ? "bg-[#00ff87]/20 text-[#00ff87] border border-[#00ff87]/30" : "bg-[#00ff87] hover:bg-[#00e676] text-black"}`}>
-          <Save size={14} /> {saved ? "Saved!" : "Save Schedule"}
+        <button onClick={save} disabled={saving} className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm rounded-xl transition-all disabled:opacity-60 ${saved ? "bg-[#00ff87]/20 text-[#00ff87] border border-[#00ff87]/30" : "bg-[#00ff87] hover:bg-[#00e676] text-black"}`}>
+          <Save size={14} /> {saving ? "Saving…" : saved ? "Saved!" : "Save Schedule"}
         </button>
       </div>
 
