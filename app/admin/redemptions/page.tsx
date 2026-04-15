@@ -120,8 +120,12 @@ export default function AdminRedemptions() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-white text-sm">{r.username}</span>
                     <span className="text-white/30 text-xs">redeemed</span>
-                    <span className="text-[#00ff87] font-semibold text-sm">{r.spinCount} spins</span>
-                    <span className="text-white/30 text-xs">on</span>
+                    {r.spinCount > 0 && (
+                      <>
+                        <span className="text-[#00ff87] font-semibold text-sm">{r.spinCount} spins</span>
+                        <span className="text-white/30 text-xs">on</span>
+                      </>
+                    )}
                     <span className="text-white/70 text-sm truncate">{r.itemName}</span>
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">

@@ -87,9 +87,13 @@ export async function POST(req: NextRequest) {
 
   console.log(`[Redeem] ${username} redeemed "${itemName}" (${itemId}) for ${pointCost} pts. New balance: ${newBalance}`);
 
+  const redeemDesc = item.spinCount > 0
+    ? `${item.spinCount} free spins on ${itemName}`
+    : itemName;
+
   return NextResponse.json({
     ok: true,
     points: newBalance,
-    message: `Successfully redeemed ${item.spinCount} spins on ${itemName}!`,
+    message: `Successfully redeemed ${redeemDesc}!`,
   });
 }

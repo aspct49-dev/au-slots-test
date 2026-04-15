@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const CHANNEL = process.env.NEXT_PUBLIC_KICK_CHANNEL ?? "auslots";
 
 export async function GET() {
@@ -9,7 +11,7 @@ export async function GET() {
         "Accept": "application/json",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
-      next: { revalidate: 60 }, // cache for 60s
+      cache: "no-store",
     });
 
     if (!res.ok) return NextResponse.json({ live: false });

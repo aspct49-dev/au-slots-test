@@ -136,18 +136,36 @@ export default function RewardCard({
 
               <div className="bg-[#1a1a1a] border border-white/[0.08] rounded-xl p-4 mb-4 space-y-3">
                 <p className="text-white/60 text-xs font-bold uppercase tracking-widest">How to claim</p>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
-                  <p className="text-white/70 text-sm">Join the <span className="text-[#00ff87] font-semibold">next live stream</span> on Kick at kick.com/auslots</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
-                  <p className="text-white/70 text-sm">Type <span className="font-mono bg-white/10 px-1.5 py-0.5 rounded text-white text-xs">!redeem</span> in chat to notify the streamer</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
-                  <p className="text-white/70 text-sm">The streamer will fulfill your bonus spins live on stream</p>
-                </div>
+
+                {spinCount === 0 ? (
+                  /* Credits, tips, consoles — Discord ticket only */
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full bg-[#5865f2]/20 text-[#5865f2] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
+                    <p className="text-white/70 text-sm">
+                      Open a <span className="text-[#5865f2] font-semibold">ticket in our Discord</span> at{" "}
+                      <a href="https://discord.gg/auslots" target="_blank" rel="noopener noreferrer" className="text-[#5865f2] underline underline-offset-2">discord.gg/auslots</a> and our team will process your reward
+                    </p>
+                  </div>
+                ) : (
+                  /* Spin items — Kick chat OR Discord ticket */
+                  <>
+                    <p className="text-white/40 text-xs">Choose either option:</p>
+                    <div className="flex items-start gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">A</div>
+                      <p className="text-white/70 text-sm">
+                        Join the <span className="text-[#00ff87] font-semibold">next live stream</span> on Kick and type{" "}
+                        <span className="font-mono bg-white/10 px-1.5 py-0.5 rounded text-white text-xs">!redeem</span> in chat
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#5865f2]/20 text-[#5865f2] text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">B</div>
+                      <p className="text-white/70 text-sm">
+                        Open a <span className="text-[#5865f2] font-semibold">ticket in our Discord</span> at{" "}
+                        <a href="https://discord.gg/auslots" target="_blank" rel="noopener noreferrer" className="text-[#5865f2] underline underline-offset-2">discord.gg/auslots</a>
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="flex items-center gap-2 text-white/30 text-xs">
