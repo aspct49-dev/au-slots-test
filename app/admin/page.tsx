@@ -6,8 +6,6 @@ import {
   Star,
   ShoppingBag,
   Ticket,
-  Trophy,
-  Target,
   Calendar,
   Gift,
   Swords,
@@ -52,14 +50,6 @@ const cards = [
     color: "#f472b6",
   },
   {
-    label: "Challenges",
-    value: "–",
-    sub: "active challenges",
-    href: "/admin/challenges",
-    icon: Target,
-    color: "#fb923c",
-  },
-  {
     label: "Schedule",
     value: 7,
     sub: "days configured",
@@ -91,7 +81,6 @@ const quickActions = [
   { label: "New Giveaway",       href: "/admin/giveaways",  icon: Gift },
   { label: "New Tournament",     href: "/admin/tournament", icon: Swords },
   { label: "Update Schedule",    href: "/admin/schedule",   icon: Calendar },
-  { label: "Leaderboard",        href: "/admin/leaderboard",icon: Trophy },
 ];
 
 export default function AdminDashboard() {

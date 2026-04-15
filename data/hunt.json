@@ -1,0 +1,11 @@
+{
+  "id": "1776217064807",
+  "startingBalance": 10000,
+  "numberOfBonuses": 40,
+  "endingBalance": 40000,
+  "status": "ended",
+  "startedAt": 1776217064807,
+  "closedAt": 1776217094889,
+  "endedAt": 1776217148027,
+  "winnerGuessId": "1776217080357"
+}

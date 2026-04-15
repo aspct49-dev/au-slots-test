@@ -8,13 +8,11 @@ const footerLinks = {
   Platform: [
     { name: "Home", href: "/" },
     { name: "Points Shop", href: "/points-shop" },
-    { name: "Leaderboard", href: "/leaderboard" },
     { name: "Raffles", href: "/raffles" },
   ],
   Community: [
     { name: "Bonus Hunts", href: "/bonus-hunt" },
     { name: "Giveaways", href: "/giveaways" },
-    { name: "Challenges", href: "/challenges" },
     { name: "Discord", href: "https://discord.gg/auslots" },
   ],
   Socials: [

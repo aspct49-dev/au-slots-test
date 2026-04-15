@@ -5,10 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Coins,
-  Trophy,
   Gift,
   Zap,
-  Target,
   Ticket,
   ArrowRight,
   Star,
@@ -48,24 +46,6 @@ const features = [
     color: "#fbbf24",
     href: "/giveaways",
     gradient: "from-[#fbbf24]/10 to-transparent",
-  },
-  {
-    icon: <Target size={28} />,
-    title: "CHALLENGES",
-    description:
-      "Complete daily and weekly challenges to earn bonus points and exclusive rewards.",
-    color: "#f87171",
-    href: "/challenges",
-    gradient: "from-[#f87171]/10 to-transparent",
-  },
-  {
-    icon: <Trophy size={28} />,
-    title: "LEADERBOARD",
-    description:
-      "Climb the ranks to claim top prizes. The most active community members are rewarded generously.",
-    color: "#FFD700",
-    href: "/leaderboard",
-    gradient: "from-[#FFD700]/10 to-transparent",
   },
   {
     icon: <Zap size={28} />,
@@ -185,7 +165,7 @@ function HowItWorksSection() {
       step: "03",
       title: "REDEEM REWARDS",
       description:
-        "Spend your points in our shop, enter raffles, or climb the leaderboard to win amazing prizes.",
+        "Spend your points in our shop, enter raffles, or join giveaways to win amazing prizes.",
       icon: <Award size={24} className="text-[#a78bfa]" />,
     },
   ];
