@@ -132,13 +132,13 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 mb-5 sm:mb-8"
+          className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 mb-5 sm:mb-8 max-w-[90vw] text-center"
         >
           <div className="relative w-2 h-2 flex-shrink-0">
             <div className="w-2 h-2 rounded-full bg-[#00ff87]" />
             <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />
           </div>
-          <span className="text-[#00ff87] text-xs sm:text-sm font-bold tracking-wider sm:tracking-widest">
+          <span className="text-[#00ff87] text-[10px] sm:text-sm font-bold tracking-wide sm:tracking-widest">
             AUSTRALIA&apos;S #1 STREAMING REWARDS COMMUNITY
           </span>
         </motion.div>
@@ -150,7 +150,7 @@ export default function HeroSection() {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="mb-5 sm:mb-6"
         >
-          <BubbleText className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight leading-none text-[#00ff87]/60">{"EARN REWARDS"}</BubbleText>
+          <BubbleText className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tight leading-none text-[#00ff87]/60">{"EARN REWARDS"}</BubbleText>
         </motion.div>
 
         {/* Mascot */}

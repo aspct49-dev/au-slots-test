@@ -51,14 +51,14 @@ export default function SlotReviewCard({ review, index, onViewReview }: Props) {
       onClick={() => onViewReview(review)}
     >
       {/* Thumbnail */}
-      <div className="relative w-full aspect-video overflow-hidden">
+      <div className="relative w-full aspect-[3/4] overflow-hidden">
         {review.imageUrl ? (
           <Image
             src={review.imageUrl}
             alt={review.gameName}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
           <div

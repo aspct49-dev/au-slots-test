@@ -97,7 +97,7 @@ function ReviewModal({
           {/* Header — image + core info */}
           <div className="flex flex-col sm:flex-row gap-0">
             {/* Image */}
-            <div className="relative w-full sm:w-56 flex-shrink-0 aspect-video sm:aspect-auto sm:h-auto min-h-[140px]">
+            <div className="relative w-full sm:w-48 flex-shrink-0 aspect-[3/4] sm:aspect-auto sm:h-auto sm:min-h-[200px]">
               {review.imageUrl ? (
                 <Image
                   src={review.imageUrl}
@@ -301,7 +301,9 @@ function ReviewModal({
                   {review.streamerRating}
                   <span className="text-lg text-white/30">/10</span>
                 </p>
-                <StarRow rating={review.streamerRating} size={18} />
+                <div className="flex justify-center mt-2">
+                  <StarRow rating={review.streamerRating} size={18} />
+                </div>
               </div>
             </div>
           </div>
@@ -515,7 +517,7 @@ export default function ReviewsPage() {
 
         {/* Grid */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {filtered.map((review, i) => (
               <SlotReviewCard
                 key={review.id}
