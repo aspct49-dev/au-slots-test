@@ -55,7 +55,7 @@ export default function AdminRedemptions() {
           <h1 className="text-2xl font-black text-white flex items-center gap-2">
             <ShoppingBag size={20} className="text-[#00ff87]" /> Redemptions
           </h1>
-          <p className="text-white/40 text-sm mt-0.5">Track and fulfil viewer reward redemptions</p>
+          <p className="text-white/40 text-sm mt-0.5">Track and fulfill viewer reward redemptions</p>
         </div>
         <button onClick={load} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all">
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
