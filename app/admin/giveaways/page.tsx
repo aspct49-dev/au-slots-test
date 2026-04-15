@@ -2,20 +2,46 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Gift, Play, StopCircle, Shuffle, CheckCircle, MessageSquare, Users, Trash2, Wifi, WifiOff } from "lucide-react";
 
 interface ChatMessage { username: string; message: string; timestamp: number; }
 interface Entry { username: string; enteredAt: number; }
 
-const KICK_CHANNEL    = process.env.NEXT_PUBLIC_KICK_CHANNEL ?? "auslots";
+const KICK_CHANNEL     = process.env.NEXT_PUBLIC_KICK_CHANNEL ?? "auslots";
 const KICK_CHATROOM_ID = process.env.NEXT_PUBLIC_KICK_CHATROOM_ID
   ? parseInt(process.env.NEXT_PUBLIC_KICK_CHATROOM_ID, 10)
   : null;
 const PUSHER_KEY = "32cbd69e4b950bf97679";
 
 const ITEM_W  = 140;
+const ITEM_H  = 96;
 const VISIBLE = 5;
-const CENTER  = 2; // Math.floor(VISIBLE / 2)
+const CENTER  = 2;
+
+function Avatar({ username, avatarUrl }: { username: string; avatarUrl?: string }) {
+  const [errored, setErrored] = useState(false);
+  const initial = username.charAt(0).toUpperCase();
+
+  if (avatarUrl && !errored) {
+    return (
+      <Image
+        src={avatarUrl}
+        alt={username}
+        width={36}
+        height={36}
+        className="w-9 h-9 rounded-full object-cover border-2 border-white/20 flex-shrink-0"
+        onError={() => setErrored(true)}
+        unoptimized
+      />
+    );
+  }
+  return (
+    <div className="w-9 h-9 rounded-full bg-[#1a1a1a] border-2 border-white/15 flex items-center justify-center text-xs font-black text-white/50 flex-shrink-0">
+      {initial}
+    </div>
+  );
+}
 
 export default function AdminGiveaways() {
   const [keyword, setKeyword]               = useState("!enter");
@@ -28,26 +54,41 @@ export default function AdminGiveaways() {
   const [spinTargetX, setSpinTargetX]       = useState(0);
   const [spinKey, setSpinKey]               = useState(0);
   const [wsStatus, setWsStatus]             = useState<"disconnected" | "connecting" | "connected" | "error">("disconnected");
+  const [avatars, setAvatars]               = useState<Record<string, string>>({});
 
-  // Refs so WebSocket handler always reads current values (avoids stale closure)
   const isListeningRef  = useRef(false);
   const keywordRef      = useRef("!enter");
   const winnerRef       = useRef<string | null>(null);
   const wsRef           = useRef<WebSocket | null>(null);
   const spinWinnerRef   = useRef<string>("");
   const chatroomIdRef   = useRef<number | null>(null);
+  const fetchingRef     = useRef<Set<string>>(new Set());
 
-  // Keep refs in sync with state
   useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
   useEffect(() => { keywordRef.current = keyword; }, [keyword]);
   useEffect(() => { winnerRef.current = winner; }, [winner]);
 
+  // Fetch avatar for each new entry
+  useEffect(() => {
+    entries.forEach(async (entry) => {
+      const key = entry.username.toLowerCase();
+      if (fetchingRef.current.has(key)) return;
+      fetchingRef.current.add(key);
+      try {
+        const res = await fetch(`/api/kick/avatar?username=${encodeURIComponent(entry.username)}`);
+        const data = await res.json();
+        if (data.avatarUrl) {
+          setAvatars(prev => ({ ...prev, [key]: data.avatarUrl }));
+        }
+      } catch { /* silently fall back to initials */ }
+    });
+  }, [entries]);
+
   // ── Chat connection ──────────────────────────────────────────────────────────
   const connectChat = useCallback(async (): Promise<boolean> => {
-    if (wsRef.current) return true; // already connected
+    if (wsRef.current) return true;
     setWsStatus("connecting");
 
-    // Use hardcoded chatroom ID if available, otherwise fetch via proxy
     if (!chatroomIdRef.current) {
       if (KICK_CHATROOM_ID) {
         chatroomIdRef.current = KICK_CHATROOM_ID;
@@ -90,12 +131,10 @@ export default function AdminGiveaways() {
 
         const chatMsg: ChatMessage = { username, message: text, timestamp: Date.now() };
 
-        // Track winner messages — uses ref so it's always current
         if (winnerRef.current && username.toLowerCase() === winnerRef.current.toLowerCase()) {
           setWinnerMessages(p => [chatMsg, ...p].slice(0, 50));
         }
 
-        // Keyword entry — uses refs to avoid stale closure
         if (
           isListeningRef.current &&
           text.trim().toLowerCase() === keywordRef.current.trim().toLowerCase()
@@ -146,13 +185,12 @@ export default function AdminGiveaways() {
     const picked = rand();
     spinWinnerRef.current = picked;
 
-    // Build strip: CENTER pre-pad + 70 random names + winner + CENTER post-pad
     const prepad  = Array.from({ length: CENTER }, rand);
     const middle  = Array.from({ length: 70 }, rand);
     const postpad = Array.from({ length: CENTER }, rand);
     const strip   = [...prepad, ...middle, picked, ...postpad];
 
-    const winnerIdx = CENTER + middle.length; // index of winner in strip
+    const winnerIdx = CENTER + middle.length;
     const targetX   = -(winnerIdx - CENTER) * ITEM_W;
 
     setSpinStrip(strip);
@@ -167,15 +205,12 @@ export default function AdminGiveaways() {
     }
   };
 
-  // Cleanup on unmount
-  useEffect(() => () => {
-    disconnectChat();
-  }, [disconnectChat]);
+  useEffect(() => () => { disconnectChat(); }, [disconnectChat]);
 
   const STATUS_COLOR = { disconnected: "text-white/30", connecting: "text-yellow-400", connected: "text-[#00ff87]", error: "text-red-400" };
   const STATUS_LABEL = { disconnected: "Disconnected", connecting: "Connecting…", connected: "Live", error: "Connection Error" };
 
-  const containerW = VISIBLE * ITEM_W; // 700px
+  const containerW = VISIBLE * ITEM_W;
 
   return (
     <div className="space-y-6">
@@ -255,7 +290,7 @@ export default function AdminGiveaways() {
                 <Shuffle size={15} /> SPIN ({entries.length} {entries.length === 1 ? "entry" : "entries"})
               </button>
               <button
-                onClick={() => { setEntries([]); setWinner(null); setWinnerMessages([]); setSpinStrip([]); }}
+                onClick={() => { setEntries([]); setWinner(null); setWinnerMessages([]); setSpinStrip([]); fetchingRef.current.clear(); setAvatars({}); }}
                 className="flex items-center justify-center gap-2 py-2 bg-white/5 hover:bg-white/10 text-white/30 font-semibold text-xs rounded-xl transition-all"
               >
                 <Trash2 size={12} /> Clear All
@@ -276,8 +311,9 @@ export default function AdminGiveaways() {
                 <p className="text-white/20 text-xs text-center py-4">No entries yet</p>
               ) : (
                 entries.map((e, i) => (
-                  <div key={e.username} className="flex items-center justify-between px-2 py-1 rounded-lg hover:bg-white/5">
-                    <span className="text-xs text-white/70">{e.username}</span>
+                  <div key={e.username} className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5">
+                    <Avatar username={e.username} avatarUrl={avatars[e.username.toLowerCase()]} />
+                    <span className="text-xs text-white/70 flex-1 truncate">{e.username}</span>
                     <span className="text-[10px] text-white/30">#{i + 1}</span>
                   </div>
                 ))
@@ -288,13 +324,13 @@ export default function AdminGiveaways() {
 
         {/* Spinner + Winner */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 flex flex-col items-center justify-center min-h-[200px]">
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 flex flex-col items-center justify-center min-h-[220px]">
             {spinStrip.length > 0 ? (
               <div className="w-full flex flex-col items-center gap-4">
                 {/* Slot machine strip */}
                 <div
                   className="relative overflow-hidden"
-                  style={{ width: containerW, height: 72 }}
+                  style={{ width: containerW, height: ITEM_H }}
                 >
                   {/* Left fade */}
                   <div className="absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-[#111111] to-transparent z-10 pointer-events-none" />
@@ -309,7 +345,7 @@ export default function AdminGiveaways() {
                   {/* Animated strip */}
                   <motion.div
                     key={spinKey}
-                    className="flex absolute top-0 left-0"
+                    className="flex absolute top-0 left-0 h-full"
                     initial={{ x: 0 }}
                     animate={{ x: spinTargetX }}
                     transition={{ duration: 4.5, ease: [0.12, 0.8, 0.15, 1.0] }}
@@ -318,10 +354,14 @@ export default function AdminGiveaways() {
                     {spinStrip.map((name, i) => (
                       <div
                         key={i}
-                        className="flex items-center justify-center flex-shrink-0 h-[72px] px-2"
-                        style={{ width: ITEM_W }}
+                        className="flex flex-col items-center justify-center gap-1.5 flex-shrink-0 px-2"
+                        style={{ width: ITEM_W, height: ITEM_H }}
                       >
-                        <span className="text-sm font-bold text-white/70 truncate max-w-full text-center">
+                        <Avatar
+                          username={name}
+                          avatarUrl={avatars[name.toLowerCase()]}
+                        />
+                        <span className="text-xs font-bold text-white/70 truncate max-w-full text-center leading-tight">
                           {name}
                         </span>
                       </div>
@@ -338,6 +378,7 @@ export default function AdminGiveaways() {
             )}
           </div>
 
+          {/* Winner card */}
           <AnimatePresence>
             {winner && !isSpinning && (
               <motion.div
@@ -346,15 +387,20 @@ export default function AdminGiveaways() {
                 exit={{ opacity: 0 }}
                 className="bg-[#00ff87]/10 border border-[#00ff87]/30 rounded-2xl p-5 flex items-center gap-4"
               >
-                <CheckCircle size={28} className="text-[#00ff87] flex-shrink-0" />
+                <Avatar
+                  username={winner}
+                  avatarUrl={avatars[winner.toLowerCase()]}
+                />
                 <div>
                   <p className="text-xs text-[#00ff87]/60 font-bold tracking-widest uppercase mb-0.5">Winner</p>
                   <p className="text-2xl font-black text-[#00ff87]">{winner}</p>
                 </div>
+                <CheckCircle size={28} className="text-[#00ff87] flex-shrink-0 ml-auto" />
               </motion.div>
             )}
           </AnimatePresence>
 
+          {/* Winner messages */}
           {winner && (
             <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <h2 className="text-sm font-black text-white/60 uppercase tracking-widest flex items-center gap-2 mb-3">
