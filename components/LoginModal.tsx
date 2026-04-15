@@ -65,25 +65,23 @@ export default function LoginModal() {
               <div className="px-8 pb-8 space-y-4">
                 <button
                   onClick={handleKickLogin}
-                  className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-black text-sm uppercase tracking-widest transition-all duration-200 bg-[#53fc18] hover:bg-[#45e014] text-black hover:shadow-[0_0_25px_rgba(83,252,24,0.4)]"
+                  className="w-full relative flex items-center justify-center py-4 px-6 rounded-xl font-black text-sm uppercase tracking-widest transition-all duration-200 bg-[#53fc18] hover:bg-[#45e014] text-black hover:shadow-[0_0_25px_rgba(83,252,24,0.4)]"
                 >
-                  <KickIcon />
+                  <span className="absolute left-4"><KickIcon /></span>
                   LOG IN WITH KICK
                 </button>
 
-                <div className="space-y-2 pt-1">
-                  <div className="flex items-start gap-2 text-xs text-white/30">
-                    <span className="text-[#53fc18] mt-0.5">✓</span>
-                    Your Botrix points balance syncs automatically
-                  </div>
-                  <div className="flex items-start gap-2 text-xs text-white/30">
-                    <span className="text-[#53fc18] mt-0.5">✓</span>
-                    Points deducted instantly when you redeem rewards
-                  </div>
-                  <div className="flex items-start gap-2 text-xs text-white/30">
-                    <span className="text-[#53fc18] mt-0.5">✓</span>
-                    Access raffles, challenges & giveaways
-                  </div>
+                <div className="pt-1 w-full flex flex-col items-center gap-2">
+                  {[
+                    "Your Botrix points balance syncs automatically",
+                    "Points deducted instantly when you redeem rewards",
+                    "Access raffles, challenges & giveaways",
+                  ].map((text) => (
+                    <div key={text} className="flex items-center gap-2 text-xs text-white/30">
+                      <span className="text-[#53fc18] flex-shrink-0">✓</span>
+                      <span>{text}</span>
+                    </div>
+                  ))}
                 </div>
 
                 <p className="text-center text-white/25 text-xs pt-2">

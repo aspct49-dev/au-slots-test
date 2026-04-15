@@ -1,6 +1,22 @@
 [
   {
     "username": "aspect900",
+    "itemId": "1",
+    "itemName": "Crazy Ex Girlfriend",
+    "spinCount": 50,
+    "pointCost": 3000,
+    "id": "1776247223421",
+    "redeemedAt": 1776247223421,
+    "status": "rejected",
+    "viperSpinEmail": "test",
+    "zestyBetInfo": "test",
+    "discordUsername": "test",
+    "infoSubmitted": true,
+    "rejectedAt": 1776247258776,
+    "rejectionReason": "Point Duplication."
+  },
+  {
+    "username": "aspect900",
     "itemId": "12",
     "itemName": "$25 Credit",
     "spinCount": 0,
