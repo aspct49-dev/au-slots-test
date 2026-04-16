@@ -10,70 +10,96 @@ import {
   getTicketsForRaffle,
 } from "@/lib/raffleStore";
 
+export const dynamic = "force-dynamic";
+
 const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? "auslots")
   .split(",").map(u => u.trim().toLowerCase());
 
-async function requireAdmin() {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+async function requireAdmin(): Promise<{ session: Awaited<ReturnType<typeof getIronSession<SessionData>>> } | NextResponse> {
+  const cookieStore = cookies();
+  const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
   if (!session.user || !ADMIN_USERNAMES.includes(session.user.username.toLowerCase())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  return null;
+  return { session };
 }
 
 // GET — list all raffles with totals + ticket breakdowns
-export async function GET(req: NextRequest) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+export async function GET() {
+  try {
+    const result = await requireAdmin();
+    if (result instanceof NextResponse) return result;
 
-  const raffles = getRafflesWithTotals();
-  const withTickets = raffles.map(r => ({
-    ...r,
-    tickets: getTicketsForRaffle(r.id),
-  }));
-  return NextResponse.json(withTickets);
+    const raffles = getRafflesWithTotals();
+    const withTickets = raffles.map(r => ({
+      ...r,
+      tickets: getTicketsForRaffle(r.id),
+    }));
+    return NextResponse.json(withTickets);
+  } catch (err) {
+    console.error("[GET /api/admin/raffles]", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
 }
 
 // POST — create raffle
 export async function POST(req: NextRequest) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  try {
+    const result = await requireAdmin();
+    if (result instanceof NextResponse) return result;
 
-  const { title, prize, ticketCost } = await req.json();
-  if (!title || !prize || !ticketCost || ticketCost <= 0) {
-    return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
+    const body = await req.json();
+    const { title, prize, ticketCost } = body as { title: string; prize: string; ticketCost: number };
+
+    if (!title || !prize || !ticketCost || Number(ticketCost) <= 0) {
+      return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
+    }
+
+    const raffle = createRaffle({ title, prize, ticketCost: Number(ticketCost) });
+    return NextResponse.json(raffle, { status: 201 });
+  } catch (err) {
+    console.error("[POST /api/admin/raffles]", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
-
-  const raffle = createRaffle({ title, prize, ticketCost: Number(ticketCost) });
-  return NextResponse.json(raffle, { status: 201 });
 }
 
 // PATCH — roll winner or other actions
 export async function PATCH(req: NextRequest) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  try {
+    const result = await requireAdmin();
+    if (result instanceof NextResponse) return result;
 
-  const { id, action } = await req.json();
-  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    const { id, action } = await req.json();
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-  if (action === "roll") {
-    const updated = rollWinner(id);
-    if (!updated) return NextResponse.json({ error: "No tickets or raffle not found" }, { status: 400 });
-    return NextResponse.json(updated);
+    if (action === "roll") {
+      const updated = rollWinner(id);
+      if (!updated) return NextResponse.json({ error: "No tickets or raffle not found" }, { status: 400 });
+      return NextResponse.json(updated);
+    }
+
+    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+  } catch (err) {
+    console.error("[PATCH /api/admin/raffles]", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
-
-  return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 }
 
 // DELETE — delete raffle
 export async function DELETE(req: NextRequest) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  try {
+    const result = await requireAdmin();
+    if (result instanceof NextResponse) return result;
 
-  const { id } = await req.json();
-  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    const { id } = await req.json();
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-  const ok = deleteRaffle(id);
-  if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json({ ok: true });
+    const ok = deleteRaffle(id);
+    if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[DELETE /api/admin/raffles]", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
 }
