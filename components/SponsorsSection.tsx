@@ -70,7 +70,7 @@ export default function SponsorsSection() {
         </motion.div>
 
         {/* Sponsor cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto items-stretch">
           {sponsors.map((sponsor, i) => (
             <motion.div
               key={sponsor.name}
@@ -78,13 +78,13 @@ export default function SponsorsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="h-full"
+              className="flex flex-col"
             >
               <a
                 href={sponsor.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex flex-col h-full rounded-2xl bg-[#111111] border overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                className="group relative flex flex-col flex-1 rounded-2xl bg-[#111111] border overflow-hidden transition-all duration-300 hover:-translate-y-1"
                 style={{ borderColor: sponsor.borderColor }}
                 onMouseEnter={e => {
                   (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 8px 40px ${sponsor.glowColor}`;
