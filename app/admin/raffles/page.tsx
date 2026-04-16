@@ -37,6 +37,7 @@ export default function AdminRaffles() {
   const [showForm, setShowForm]     = useState(false);
   const [form, setForm]             = useState({ title: "", prize: "", ticketCost: 500 });
   const [creating, setCreating]     = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [rolling, setRolling]       = useState<string | null>(null);
   const [deleting, setDeleting]     = useState<string | null>(null);
   const [expanded, setExpanded]     = useState<string | null>(null);
@@ -56,17 +57,26 @@ export default function AdminRaffles() {
   const handleCreate = async () => {
     if (!form.title || !form.prize || form.ticketCost <= 0) return;
     setCreating(true);
-    const res = await fetch("/api/admin/raffles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) {
-      setForm({ title: "", prize: "", ticketCost: 500 });
-      setShowForm(false);
-      await load();
+    setCreateError(null);
+    try {
+      const res = await fetch("/api/admin/raffles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setForm({ title: "", prize: "", ticketCost: 500 });
+        setShowForm(false);
+        await load();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setCreateError(data.error ?? `Server error (${res.status})`);
+      }
+    } catch (err) {
+      setCreateError("Network error — please try again.");
+    } finally {
+      setCreating(false);
     }
-    setCreating(false);
   };
 
   const handleRoll = async (id: string, hasTickets: boolean) => {
@@ -130,7 +140,7 @@ export default function AdminRaffles() {
           >
             <div className="flex items-center justify-between">
               <h2 className="text-base font-black text-white">New Raffle</h2>
-              <button onClick={() => setShowForm(false)}>
+              <button onClick={() => { setShowForm(false); setCreateError(null); }}>
                 <X size={16} className="text-white/40 hover:text-white transition-colors" />
               </button>
             </div>
@@ -166,6 +176,12 @@ export default function AdminRaffles() {
               </div>
             </div>
 
+            {createError && (
+              <div className="px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
+                {createError}
+              </div>
+            )}
+
             <div className="flex gap-3 pt-2 border-t border-white/[0.06]">
               <button
                 onClick={handleCreate}
@@ -176,7 +192,7 @@ export default function AdminRaffles() {
                 Create Raffle
               </button>
               <button
-                onClick={() => setShowForm(false)}
+                onClick={() => { setShowForm(false); setCreateError(null); }}
                 className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 font-semibold text-sm rounded-xl transition-all"
               >
                 Cancel

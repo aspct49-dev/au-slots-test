@@ -16,6 +16,7 @@ import {
   Instagram,
   Facebook,
   Shield,
+  ClipboardList,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -292,6 +293,14 @@ export default function Navbar() {
                             Admin Panel
                           </Link>
                         )}
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-3 hover:bg-white/5 transition-colors text-sm text-white/70 hover:text-white border-b border-white/5"
+                        >
+                          <ClipboardList size={14} />
+                          My Dashboard
+                        </Link>
                         <Link
                           href="/points-shop"
                           onClick={() => setUserMenuOpen(false)}
