@@ -17,6 +17,7 @@ import {
   Facebook,
   Shield,
   ClipboardList,
+  Tv2,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -92,6 +93,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, isLoggedIn, openLoginModal, logout } = useAuth();
   const isAdmin = isLoggedIn && ADMIN_USERNAMES.includes(user?.username?.toLowerCase() ?? "");
+  const [isStreamer, setIsStreamer] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [socialsOpen, setSocialsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -119,6 +121,14 @@ export default function Navbar() {
     const interval = setInterval(checkLive, 60_000); // re-check every 60s
     return () => clearInterval(interval);
   }, [checkLive]);
+
+  useEffect(() => {
+    if (!isLoggedIn || isAdmin) { setIsStreamer(false); return; }
+    fetch("/api/admin/streamers")
+      .then(r => r.ok ? r.json() : [])
+      .then((list: string[]) => setIsStreamer(list.includes(user?.username?.toLowerCase() ?? "")))
+      .catch(() => {});
+  }, [isLoggedIn, isAdmin, user?.username]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -291,6 +301,16 @@ export default function Navbar() {
                           >
                             <Shield size={14} />
                             Admin Panel
+                          </Link>
+                        )}
+                        {isStreamer && (
+                          <Link
+                            href="/admin/bonus-hunt"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-2 px-4 py-3 hover:bg-[#a78bfa]/5 transition-colors text-sm text-[#a78bfa] hover:text-[#a78bfa] border-b border-white/5"
+                          >
+                            <Tv2 size={14} />
+                            Streamer Panel
                           </Link>
                         )}
                         <Link
