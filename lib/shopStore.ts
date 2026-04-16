@@ -53,7 +53,7 @@ export interface Redemption {
 // ── Defaults (used only when no file exists yet) ──────────────────────────────
 
 const DEFAULT_ITEMS: ShopItem[] = [
-  { id: "1", gameName: "Crazy Ex Girlfriend",   provider: "Nolimit City",   spinCount: 50,  pointCost: 3000, inventory: 87, maxInventory: 100, gradient: "linear-gradient(135deg, #ff6b6b 0%, #c0392b 50%, #8b0000 100%)", providerColor: "#ff6b6b", imageUrl: "/images/crazy_ex_girlfriend.webp" },
+  { id: "1", gameName: "Crazy Ex Girlfriend",   provider: "NoLimit City",   spinCount: 50,  pointCost: 3000, inventory: 87, maxInventory: 100, gradient: "linear-gradient(135deg, #ff6b6b 0%, #c0392b 50%, #8b0000 100%)", providerColor: "#ff6b6b", imageUrl: "/images/crazy_ex_girlfriend.webp" },
   { id: "2", gameName: "Chaos Crew 3",           provider: "Hacksaw",        spinCount: 50,  pointCost: 3000, inventory: 91, maxInventory: 100, gradient: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 50%, #4c1d95 100%)", providerColor: "#a78bfa", imageUrl: "/images/chaos_crew_3.jpg" },
   { id: "3", gameName: "Sweet Bonanza 1000",     provider: "Pragmatic Play", spinCount: 100, pointCost: 3875, inventory: 45, maxInventory: 100, gradient: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #d97706 100%)", providerColor: "#fbbf24", imageUrl: "/images/sweet-bonanza-1000.png" },
   { id: "4", gameName: "Gates of Olympus 1000",  provider: "Pragmatic Play", spinCount: 100, pointCost: 3875, inventory: 62, maxInventory: 100, gradient: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 40%, #1d4ed8 100%)", providerColor: "#60a5fa", imageUrl: "/images/gates-of-olympus-1000.png" },
@@ -127,6 +127,15 @@ export function decrementInventory(itemId: string): boolean {
   const item = items.find(i => i.id === itemId);
   if (!item || item.inventory <= 0) return false;
   item.inventory -= 1;
+  saveShopItems(items);
+  return true;
+}
+
+export function incrementInventory(itemId: string): boolean {
+  const items = getShopItems();
+  const item = items.find(i => i.id === itemId);
+  if (!item) return false;
+  if (item.inventory < item.maxInventory) item.inventory += 1;
   saveShopItems(items);
   return true;
 }

@@ -3,7 +3,12 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { getBotrixPoints, deductBotrixPoints } from "@/lib/botrix";
-import { getShopItems, decrementInventory, addRedemption } from "@/lib/shopStore";
+import { getShopItems, decrementInventory, addRedemption, getRedemptions } from "@/lib/shopStore";
+
+const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? process.env.NEXT_PUBLIC_ADMIN_USERNAMES ?? "auslots")
+  .split(",").map(u => u.trim().toLowerCase());
+
+const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 interface RedeemBody {
   itemId: string;
@@ -43,6 +48,39 @@ export async function POST(req: NextRequest) {
 
   const username = session.user.username;
   const uid = session.user.id;
+  const isAdmin = ADMIN_USERNAMES.includes(username.toLowerCase());
+
+  // 7-day cooldown check (admins exempt)
+  if (!isAdmin) {
+    const allRedemptions = getRedemptions();
+    const userRedemptions = allRedemptions.filter(r => r.username.toLowerCase() === username.toLowerCase());
+
+    // Block if there's a pending redemption (can't stack)
+    const hasPending = userRedemptions.some(r => r.status === "pending");
+    if (hasPending) {
+      return NextResponse.json(
+        { error: "You already have a pending redemption. Please wait for it to be processed." },
+        { status: 429 }
+      );
+    }
+
+    // Block if last fulfilled redemption was within 7 days
+    const lastFulfilled = userRedemptions
+      .filter(r => r.status === "fulfilled")
+      .sort((a, b) => b.redeemedAt - a.redeemedAt)[0];
+
+    if (lastFulfilled) {
+      const msElapsed = Date.now() - lastFulfilled.redeemedAt;
+      if (msElapsed < COOLDOWN_MS) {
+        const msRemaining = COOLDOWN_MS - msElapsed;
+        const daysLeft = Math.ceil(msRemaining / (24 * 60 * 60 * 1000));
+        return NextResponse.json(
+          { error: `You can redeem again in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}. Items can only be redeemed once every 7 days.` },
+          { status: 429 }
+        );
+      }
+    }
+  }
 
   // Re-fetch live balance from Botrix to prevent stale-cache exploits
   let currentPoints: number;

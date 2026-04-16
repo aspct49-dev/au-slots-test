@@ -310,7 +310,7 @@ export const reviews: SlotReview[] = [
   {
     id: "8",
     gameName: "Crazy Ex Girlfriend",
-    provider: "Nolimit City",
+    provider: "NoLimit City",
     providerColor: "#ff6b6b",
     imageUrl: "/images/crazy_ex_girlfriend.webp",
     gradientFallback: "linear-gradient(135deg, #ff6b6b 0%, #c0392b 50%, #8b0000 100%)",
@@ -325,11 +325,11 @@ export const reviews: SlotReview[] = [
     userRatingCount: 1789,
     tags: ["HOT"],
     about:
-      "Crazy Ex Girlfriend from Nolimit City is a darkly comic slot that perfectly captures the studio's signature flair for storytelling and mechanical innovation. The high-energy love-gone-wrong narrative plays out across 5 reels with Nolimit's trademark xWays and xNudge mechanics, delivering the kind of explosive variance that has made the developer legendary in the streaming community.",
+      "Crazy Ex Girlfriend from NoLimit City is a darkly comic slot that perfectly captures the studio's signature flair for storytelling and mechanical innovation. The high-energy love-gone-wrong narrative plays out across 5 reels with Nolimit's trademark xWays and xNudge mechanics, delivering the kind of explosive variance that has made the developer legendary in the streaming community.",
     bettingAndFeatures:
-      "Stakes range from $0.20 to $100. Nolimit City's xWays mechanic allows reel symbols to expand and multiply the number of ways to win, while xNudge wilds with multipliers inch into full view and stack their values. Free spins are triggered by scatter appearances, and the xBomb mechanic can clear reels and add multipliers simultaneously.",
+      "Stakes range from $0.20 to $100. NoLimit City's xWays mechanic allows reel symbols to expand and multiply the number of ways to win, while xNudge wilds with multipliers inch into full view and stack their values. Free spins are triggered by scatter appearances, and the xBomb mechanic can clear reels and add multipliers simultaneously.",
     gameplayFeatures: [
-      "5-reel layout with Nolimit City's xWays expanding symbols",
+      "5-reel layout with NoLimit City's xWays expanding symbols",
       "xNudge wilds with stacking multiplier values",
       "xBomb symbols clear reels and simultaneously add multipliers",
       "Free spins with enhanced xWays and xNudge triggers",
@@ -337,20 +337,20 @@ export const reviews: SlotReview[] = [
       "Maximum win: 40,000x stake — one of the highest in the industry",
     ],
     streamerTake:
-      "Crazy Ex Girlfriend has that unmistakable Nolimit City energy — a bit unhinged, totally entertaining, and capable of absolutely wild results. The 40,000x ceiling is no joke. I've had free spins on this slot where xBombs and xNudge wilds combined and just went completely ballistic. Brilliant concept, brilliant execution.",
+      "Crazy Ex Girlfriend has that unmistakable NoLimit City energy — a bit unhinged, totally entertaining, and capable of absolutely wild results. The 40,000x ceiling is no joke. I've had free spins on this slot where xBombs and xNudge wilds combined and just went completely ballistic. Brilliant concept, brilliant execution.",
     finalVerdict:
-      "Nolimit City has done it again. Crazy Ex Girlfriend combines their best mechanics with a hilarious theme and a ceiling that most slots can't touch. If you're chasing a life-changing hit, this is the kind of slot you build your bonus hunt around.",
+      "NoLimit City has done it again. Crazy Ex Girlfriend combines their best mechanics with a hilarious theme and a ceiling that most slots can't touch. If you're chasing a life-changing hit, this is the kind of slot you build your bonus hunt around.",
     gamingTips: [
       "Understand the xNudge wild mechanic — stacking multipliers is the key",
       "xBombs combined with wild multipliers can create exponential results",
       "The 40,000x ceiling is rare but achievable — bankroll accordingly",
-      "Nolimit City games generally have shorter bonus frequencies; expect dry spells",
+      "NoLimit City games generally have shorter bonus frequencies; expect dry spells",
     ],
   },
   {
     id: "9",
     gameName: "Le Bandit",
-    provider: "Nolimit City",
+    provider: "NoLimit City",
     providerColor: "#fde68a",
     imageUrl: "/images/le-bandit.jpg",
     gradientFallback: "linear-gradient(135deg, #fde68a 0%, #f59e0b 40%, #92400e 100%)",
@@ -365,7 +365,7 @@ export const reviews: SlotReview[] = [
     userRatingCount: 2234,
     tags: ["CLASSIC"],
     about:
-      "Le Bandit is a Nolimit City classic — a Wild West-themed heist slot that introduced many players to the studio's signature volatile style. With a charming outlaw protagonist and mechanics built around their trademark xWays system, Le Bandit blends narrative charm with mechanics that can produce extraordinary, rare results. It remains one of the most loved Nolimit titles in the community.",
+      "Le Bandit is a NoLimit City classic — a Wild West-themed heist slot that introduced many players to the studio's signature volatile style. With a charming outlaw protagonist and mechanics built around their trademark xWays system, Le Bandit blends narrative charm with mechanics that can produce extraordinary, rare results. It remains one of the most loved Nolimit titles in the community.",
     bettingAndFeatures:
       "Bets run from $0.20 to $100. Le Bandit uses a 5-reel setup with Nolimit's xWays symbols, which randomly expand to show 2–4 symbols per reel position, multiplying ways to win. The train heist mechanic activates bonus rounds with increasing complexity, and xNudge wilds deliver multiplied payouts during key moments.",
     gameplayFeatures: [
@@ -377,9 +377,9 @@ export const reviews: SlotReview[] = [
       "Max win: 46,000x stake",
     ],
     streamerTake:
-      "Le Bandit is a Nolimit City classic I keep coming back to. It doesn't have the flashiest modern presentation, but when xWays start multiplying alongside a nudge wild — it's electric. Some of my most memorable stream moments have come from Le Bandit bonus rounds that just went absolutely haywire.",
+      "Le Bandit is a NoLimit City classic I keep coming back to. It doesn't have the flashiest modern presentation, but when xWays start multiplying alongside a nudge wild — it's electric. Some of my most memorable stream moments have come from Le Bandit bonus rounds that just went absolutely haywire.",
     finalVerdict:
-      "A Nolimit City classic that holds up perfectly. Le Bandit's xWays mechanics and outlaw charm make it one of the most rewatchable slots in the genre. The win ceiling is staggering, and the bonus mechanics deliver genuine excitement every time they trigger.",
+      "A NoLimit City classic that holds up perfectly. Le Bandit's xWays mechanics and outlaw charm make it one of the most rewatchable slots in the genre. The win ceiling is staggering, and the bonus mechanics deliver genuine excitement every time they trigger.",
     gamingTips: [
       "xWays expanding to 4 symbols simultaneously is a massive ways-to-win multiplier",
       "Stack xNudge wilds to compound the multiplier effect",
