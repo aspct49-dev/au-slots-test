@@ -6,15 +6,13 @@
  */
 
 import fs from "fs";
-import path from "path";
+import { DATA_DIR, WRITE_DIR } from "./dataDir";
 
-// On Vercel, process.cwd() is read-only. Use /tmp for writes.
-const IS_VERCEL    = !!process.env.VERCEL;
-const DATA_DIR     = path.join(process.cwd(), "data");
-const WRITE_DIR    = IS_VERCEL ? "/tmp/auslots-data" : DATA_DIR;
-const ITEMS_FILE      = path.join(DATA_DIR, "shop-items.json");
-const ITEMS_FILE_WRITE = path.join(WRITE_DIR, "shop-items.json");
-const REDEMPTIONS_FILE = path.join(WRITE_DIR, "redemptions.json");
+const IS_PROD = process.env.NODE_ENV === "production";
+
+const ITEMS_FILE      = `${DATA_DIR}/shop-items.json`;
+const ITEMS_FILE_WRITE = `${WRITE_DIR}/shop-items.json`;
+const REDEMPTIONS_FILE = `${WRITE_DIR}/redemptions.json`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -87,7 +85,7 @@ function writeJSON<T>(file: string, data: T) {
 
 export function getShopItems(): ShopItem[] {
   // On Vercel, prefer /tmp copy if it exists (has latest inventory counts)
-  if (IS_VERCEL && fs.existsSync(ITEMS_FILE_WRITE)) {
+  if (IS_PROD && fs.existsSync(ITEMS_FILE_WRITE)) {
     return readJSON<ShopItem[]>(ITEMS_FILE_WRITE, DEFAULT_ITEMS);
   }
   return readJSON<ShopItem[]>(ITEMS_FILE, DEFAULT_ITEMS);

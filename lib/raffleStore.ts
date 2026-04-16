@@ -1,14 +1,12 @@
 import fs from "fs";
-import path from "path";
+import { DATA_DIR, WRITE_DIR } from "./dataDir";
 
-const IS_VERCEL    = !!process.env.VERCEL;
-const DATA_DIR     = path.join(process.cwd(), "data");
-const WRITE_DIR    = IS_VERCEL ? "/tmp/auslots-data" : DATA_DIR;
+const IS_PROD = process.env.NODE_ENV === "production";
 
-const RAFFLES_FILE       = path.join(DATA_DIR,  "raffles.json");
-const RAFFLES_FILE_WRITE = path.join(WRITE_DIR, "raffles.json");
-const TICKETS_FILE       = path.join(DATA_DIR,  "raffle-tickets.json");
-const TICKETS_FILE_WRITE = path.join(WRITE_DIR, "raffle-tickets.json");
+const RAFFLES_FILE       = `${DATA_DIR}/raffles.json`;
+const RAFFLES_FILE_WRITE = `${WRITE_DIR}/raffles.json`;
+const TICKETS_FILE       = `${DATA_DIR}/raffle-tickets.json`;
+const TICKETS_FILE_WRITE = `${WRITE_DIR}/raffle-tickets.json`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -55,7 +53,7 @@ function writeJSON<T>(file: string, data: T) {
 // ── Raffles ───────────────────────────────────────────────────────────────────
 
 export function getRaffles(): Raffle[] {
-  if (IS_VERCEL && fs.existsSync(RAFFLES_FILE_WRITE)) {
+  if (IS_PROD && fs.existsSync(RAFFLES_FILE_WRITE)) {
     return readJSON<Raffle[]>(RAFFLES_FILE_WRITE, []);
   }
   return readJSON<Raffle[]>(RAFFLES_FILE, []);
@@ -95,7 +93,7 @@ export function deleteRaffle(id: string): boolean {
 // ── Tickets ───────────────────────────────────────────────────────────────────
 
 export function getAllTickets(): RaffleTicket[] {
-  if (IS_VERCEL && fs.existsSync(TICKETS_FILE_WRITE)) {
+  if (IS_PROD && fs.existsSync(TICKETS_FILE_WRITE)) {
     return readJSON<RaffleTicket[]>(TICKETS_FILE_WRITE, []);
   }
   return readJSON<RaffleTicket[]>(TICKETS_FILE, []);

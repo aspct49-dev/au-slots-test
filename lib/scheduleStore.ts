@@ -1,12 +1,10 @@
 import fs from "fs";
-import path from "path";
+import { DATA_DIR, WRITE_DIR } from "./dataDir";
 
-const IS_VERCEL      = !!process.env.VERCEL;
-const DATA_DIR       = path.join(process.cwd(), "data");
-const WRITE_DIR      = IS_VERCEL ? "/tmp/auslots-data" : DATA_DIR;
+const IS_PROD = process.env.NODE_ENV === "production";
 
-const SCHEDULE_FILE       = path.join(DATA_DIR,  "schedule.json");
-const SCHEDULE_FILE_WRITE = path.join(WRITE_DIR, "schedule.json");
+const SCHEDULE_FILE       = `${DATA_DIR}/schedule.json`;
+const SCHEDULE_FILE_WRITE = `${WRITE_DIR}/schedule.json`;
 
 export interface StreamDay {
   day: string;
@@ -36,7 +34,7 @@ function ensureDir() {
 
 export function getSchedule(): StreamDay[] {
   try {
-    const file = IS_VERCEL && fs.existsSync(SCHEDULE_FILE_WRITE) ? SCHEDULE_FILE_WRITE : SCHEDULE_FILE;
+    const file = IS_PROD && fs.existsSync(SCHEDULE_FILE_WRITE) ? SCHEDULE_FILE_WRITE : SCHEDULE_FILE;
     if (!fs.existsSync(file)) return DEFAULT_SCHEDULE;
     return JSON.parse(fs.readFileSync(file, "utf-8")) as StreamDay[];
   } catch {

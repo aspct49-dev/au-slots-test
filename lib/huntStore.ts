@@ -1,14 +1,12 @@
 import fs from "fs";
-import path from "path";
+import { DATA_DIR, WRITE_DIR } from "./dataDir";
 
-const IS_VERCEL     = !!process.env.VERCEL;
-const DATA_DIR      = path.join(process.cwd(), "data");
-const WRITE_DIR     = IS_VERCEL ? "/tmp/auslots-data" : DATA_DIR;
+const IS_PROD = process.env.NODE_ENV === "production";
 
-const HUNT_FILE         = path.join(DATA_DIR,  "hunt.json");
-const HUNT_FILE_WRITE   = path.join(WRITE_DIR, "hunt.json");
-const GUESSES_FILE      = path.join(DATA_DIR,  "hunt-guesses.json");
-const GUESSES_FILE_WRITE = path.join(WRITE_DIR, "hunt-guesses.json");
+const HUNT_FILE         = `${DATA_DIR}/hunt.json`;
+const HUNT_FILE_WRITE   = `${WRITE_DIR}/hunt.json`;
+const GUESSES_FILE      = `${DATA_DIR}/hunt-guesses.json`;
+const GUESSES_FILE_WRITE = `${WRITE_DIR}/hunt-guesses.json`;
 
 export type HuntStatus = "active" | "closed" | "ended";
 
@@ -53,7 +51,7 @@ function writeJSON<T>(file: string, data: T) {
 // ── hunt ───────────────────────────────────────────────────────────────────────
 
 export function getCurrentHunt(): Hunt | null {
-  if (IS_VERCEL && fs.existsSync(HUNT_FILE_WRITE)) {
+  if (IS_PROD && fs.existsSync(HUNT_FILE_WRITE)) {
     return readJSON<Hunt | null>(HUNT_FILE_WRITE, null);
   }
   return readJSON<Hunt | null>(HUNT_FILE, null);
@@ -111,7 +109,7 @@ export function clearHunt() {
 // ── guesses ────────────────────────────────────────────────────────────────────
 
 export function getAllGuesses(): Guess[] {
-  if (IS_VERCEL && fs.existsSync(GUESSES_FILE_WRITE)) {
+  if (IS_PROD && fs.existsSync(GUESSES_FILE_WRITE)) {
     return readJSON<Guess[]>(GUESSES_FILE_WRITE, []);
   }
   return readJSON<Guess[]>(GUESSES_FILE, []);

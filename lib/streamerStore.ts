@@ -1,12 +1,10 @@
 import fs from "fs";
-import path from "path";
+import { DATA_DIR, WRITE_DIR } from "./dataDir";
 
-const IS_VERCEL           = !!process.env.VERCEL;
-const DATA_DIR            = path.join(process.cwd(), "data");
-const WRITE_DIR           = IS_VERCEL ? "/tmp/auslots-data" : DATA_DIR;
+const IS_PROD = process.env.NODE_ENV === "production";
 
-const STREAMERS_FILE       = path.join(DATA_DIR,  "streamers.json");
-const STREAMERS_FILE_WRITE = path.join(WRITE_DIR, "streamers.json");
+const STREAMERS_FILE       = `${DATA_DIR}/streamers.json`;
+const STREAMERS_FILE_WRITE = `${WRITE_DIR}/streamers.json`;
 
 function ensureDir() {
   if (!fs.existsSync(WRITE_DIR)) fs.mkdirSync(WRITE_DIR, { recursive: true });
@@ -14,7 +12,7 @@ function ensureDir() {
 
 function readStreamers(): string[] {
   try {
-    const file = IS_VERCEL && fs.existsSync(STREAMERS_FILE_WRITE)
+    const file = IS_PROD && fs.existsSync(STREAMERS_FILE_WRITE)
       ? STREAMERS_FILE_WRITE
       : STREAMERS_FILE;
     if (!fs.existsSync(file)) return [];

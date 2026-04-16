@@ -305,13 +305,19 @@ export default function RafflesPage() {
           </div>
         )}
 
-        {/* Past winners */}
-        {ended.length > 0 && (
-          <section>
-            <div className="flex items-center gap-2 mb-5">
-              <Trophy size={18} className="text-[#a78bfa]" />
-              <h2 className="text-xl font-black text-white">Past Winners</h2>
+        {/* Past winners — always shown */}
+        <section>
+          <div className="flex items-center gap-2 mb-5">
+            <Trophy size={18} className="text-[#a78bfa]" />
+            <h2 className="text-xl font-black text-white">Past Winners</h2>
+          </div>
+          {ended.length === 0 ? (
+            <div className="text-center py-10 bg-[#111111] border border-white/[0.06] rounded-2xl">
+              <Crown size={32} className="mx-auto mb-2 text-[#a78bfa]/20" />
+              <p className="text-white/30 font-bold text-sm">No raffles have ended yet</p>
+              <p className="text-white/20 text-xs mt-1">Winners will appear here once a raffle is drawn.</p>
             </div>
+          ) : (
             <div className="space-y-3">
               {ended.map(r => (
                 <motion.div
@@ -320,11 +326,11 @@ export default function RafflesPage() {
                   animate={{ opacity: 1 }}
                   className="flex items-center gap-4 p-4 bg-[#111111] border border-white/[0.06] rounded-xl"
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#a78bfa]/10 border border-[#a78bfa]/20 flex items-center justify-center flex-shrink-0">
-                    <Crown size={16} className="text-[#a78bfa]" />
+                  <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <Crown size={16} className="text-amber-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm">{r.winner ?? "—"}</p>
+                    <p className="text-amber-400 font-black text-sm">{r.winner ?? "No winner"}</p>
                     <p className="text-white/40 text-xs truncate">{r.title} · <span className="text-[#a78bfa]/70">{r.prize}</span></p>
                   </div>
                   {r.endedAt && (
@@ -335,8 +341,8 @@ export default function RafflesPage() {
                 </motion.div>
               ))}
             </div>
-          </section>
-        )}
+          )}
+        </section>
       </div>
     </div>
   );
