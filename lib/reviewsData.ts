@@ -429,5 +429,5 @@ export const reviews: SlotReview[] = [
   },
 ];
 
-export const providers = [...new Set(reviews.map((r) => r.provider))];
+export const providers = Array.from(new Set(reviews.map((r) => r.provider)));
 export const volatilities: Volatility[] = ["LOW", "MEDIUM", "HIGH", "VERY HIGH"];
