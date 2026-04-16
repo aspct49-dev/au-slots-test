@@ -21,42 +21,70 @@ import {
   Shield,
   ClipboardList,
   Flame,
+  Tv2,
 } from "lucide-react";
 
 const ADMIN_USERNAMES = (process.env.NEXT_PUBLIC_ADMIN_USERNAMES ?? "auslots")
   .split(",")
   .map((u) => u.trim().toLowerCase());
 
-const navItems = [
-  { label: "Dashboard",    href: "/admin",             icon: LayoutDashboard },
-  { label: "Reviews",      href: "/admin/reviews",     icon: Star },
-  { label: "Points Shop",  href: "/admin/shop",        icon: ShoppingBag },
-  { label: "Redemptions",  href: "/admin/redemptions", icon: ClipboardList },
-  { label: "Bonus Hunt",   href: "/admin/bonus-hunt",  icon: Flame },
-  { label: "Raffles",      href: "/admin/raffles",     icon: Ticket },
-  { label: "Giveaways",    href: "/admin/giveaways",   icon: Gift },
-  { label: "Schedule",     href: "/admin/schedule",    icon: Calendar },
-  { label: "Tournament",   href: "/admin/tournament",  icon: Swords },
-  { label: "Users",        href: "/admin/users",       icon: Users },
-  { label: "Settings",     href: "/admin/settings",    icon: Settings },
+const ALL_NAV_ITEMS = [
+  { label: "Dashboard",    href: "/admin",             icon: LayoutDashboard, adminOnly: true },
+  { label: "Reviews",      href: "/admin/reviews",     icon: Star,            adminOnly: true },
+  { label: "Points Shop",  href: "/admin/shop",        icon: ShoppingBag,     adminOnly: true },
+  { label: "Redemptions",  href: "/admin/redemptions", icon: ClipboardList,   adminOnly: true },
+  { label: "Bonus Hunt",   href: "/admin/bonus-hunt",  icon: Flame,           adminOnly: false },
+  { label: "Raffles",      href: "/admin/raffles",     icon: Ticket,          adminOnly: true },
+  { label: "Giveaways",    href: "/admin/giveaways",   icon: Gift,            adminOnly: false },
+  { label: "Schedule",     href: "/admin/schedule",    icon: Calendar,        adminOnly: true },
+  { label: "Tournament",   href: "/admin/tournament",  icon: Swords,          adminOnly: false },
+  { label: "Users",        href: "/admin/users",       icon: Users,           adminOnly: true },
+  { label: "Settings",     href: "/admin/settings",    icon: Settings,        adminOnly: true },
 ];
+
+// Pages a streamer is allowed to access
+const STREAMER_ALLOWED = ["/admin/bonus-hunt", "/admin/giveaways", "/admin/tournament"];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoggedIn, isLoading, openLoginModal } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [streamerList, setStreamerList] = useState<string[]>([]);
+  const [roleLoading, setRoleLoading] = useState(true);
 
   const isAdmin = isLoggedIn && ADMIN_USERNAMES.includes(user?.username?.toLowerCase() ?? "");
+  const isStreamerRole = isLoggedIn && !isAdmin && streamerList.includes(user?.username?.toLowerCase() ?? "");
+  const hasAccess = isAdmin || isStreamerRole;
+
+  // Fetch streamer list to determine role
+  useEffect(() => {
+    if (!isLoggedIn) { setRoleLoading(false); return; }
+    fetch("/api/admin/streamers")
+      .then(r => r.ok ? r.json() : [])
+      .then((list: string[]) => setStreamerList(list))
+      .catch(() => {})
+      .finally(() => setRoleLoading(false));
+  }, [isLoggedIn]);
 
   useEffect(() => {
-    if (!isLoading && !isAdmin) {
+    if (isLoading || roleLoading) return;
+    if (!hasAccess) {
       if (!isLoggedIn) openLoginModal();
       else router.replace("/");
+      return;
     }
-  }, [isLoading, isAdmin, isLoggedIn, openLoginModal, router]);
+    // Streamer trying to access admin-only page
+    if (isStreamerRole && !STREAMER_ALLOWED.some(p => pathname.startsWith(p))) {
+      router.replace("/admin/bonus-hunt");
+    }
+  }, [isLoading, roleLoading, hasAccess, isStreamerRole, pathname, isLoggedIn, openLoginModal, router]);
 
-  if (isLoading) {
+  const navItems = isAdmin
+    ? ALL_NAV_ITEMS
+    : ALL_NAV_ITEMS.filter(item => !item.adminOnly);
+
+  if (isLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#00ff87]/30 border-t-[#00ff87] rounded-full animate-spin" />
@@ -64,7 +92,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!isAdmin) return null;
+  if (!hasAccess) return null;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex">
@@ -72,12 +100,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="hidden lg:flex flex-col w-60 fixed top-0 left-0 h-full bg-[#0d0d0d] border-r border-white/[0.06] z-40">
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
-          <div className="w-8 h-8 rounded-lg bg-[#00ff87]/10 border border-[#00ff87]/20 flex items-center justify-center">
-            <Shield size={16} className="text-[#00ff87]" />
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isAdmin ? "bg-[#00ff87]/10 border border-[#00ff87]/20" : "bg-[#a78bfa]/10 border border-[#a78bfa]/20"}`}>
+            {isAdmin ? <Shield size={16} className="text-[#00ff87]" /> : <Tv2 size={16} className="text-[#a78bfa]" />}
           </div>
           <div>
-            <p className="text-xs font-black tracking-widest text-white">ADMIN</p>
-            <p className="text-[10px] text-[#00ff87] font-semibold">AUSlots Panel</p>
+            <p className="text-xs font-black tracking-widest text-white">{isAdmin ? "ADMIN" : "STREAMER"}</p>
+            <p className={`text-[10px] font-semibold ${isAdmin ? "text-[#00ff87]" : "text-[#a78bfa]"}`}>AUSlots Panel</p>
           </div>
         </div>
 
@@ -106,12 +134,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* User */}
         <div className="px-4 py-4 border-t border-white/[0.06]">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-[#00ff87]/20 flex items-center justify-center text-xs font-black text-[#00ff87]">
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${isAdmin ? "bg-[#00ff87]/20 text-[#00ff87]" : "bg-[#a78bfa]/20 text-[#a78bfa]"}`}>
               {user?.username?.charAt(0).toUpperCase()}
             </div>
             <div>
               <p className="text-xs font-bold text-white">{user?.username}</p>
-              <p className="text-[10px] text-[#00ff87]">Administrator</p>
+              <p className={`text-[10px] ${isAdmin ? "text-[#00ff87]" : "text-[#a78bfa]"}`}>{isAdmin ? "Administrator" : "Streamer"}</p>
             </div>
           </div>
         </div>

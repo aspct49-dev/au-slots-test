@@ -3,24 +3,26 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { getCurrentHunt, startHunt, closeEntries, endHunt, clearHunt } from "@/lib/huntStore";
+import { isStreamer } from "@/lib/streamerStore";
 
 export const dynamic = "force-dynamic";
 
 const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? "auslots")
   .split(",").map(u => u.trim().toLowerCase());
 
-async function requireAdmin(): Promise<NextResponse | null> {
+async function requireAdminOrStreamer(): Promise<NextResponse | null> {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
-  if (!session.user || !ADMIN_USERNAMES.includes(session.user.username.toLowerCase())) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  if (!session.user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const username = session.user.username;
+  const allowed = ADMIN_USERNAMES.includes(username.toLowerCase()) || isStreamer(username);
+  if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   return null;
 }
 
 // GET — current hunt state
 export async function GET() {
   try {
-    const denied = await requireAdmin();
+    const denied = await requireAdminOrStreamer();
     if (denied) return denied;
     return NextResponse.json(getCurrentHunt());
   } catch (err) {
@@ -32,7 +34,7 @@ export async function GET() {
 // POST — start a new hunt
 export async function POST(req: NextRequest) {
   try {
-    const denied = await requireAdmin();
+    const denied = await requireAdminOrStreamer();
     if (denied) return denied;
 
     const { startingBalance, numberOfBonuses } = await req.json();
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
 // PATCH — close entries | end hunt | clear
 export async function PATCH(req: NextRequest) {
   try {
-    const denied = await requireAdmin();
+    const denied = await requireAdminOrStreamer();
     if (denied) return denied;
 
     const { action, endingBalance } = await req.json();
