@@ -8,9 +8,13 @@
 import fs from "fs";
 import path from "path";
 
-const DATA_DIR        = path.join(process.cwd(), "data");
+// On Vercel, process.cwd() is read-only. Use /tmp for writes.
+const IS_VERCEL    = !!process.env.VERCEL;
+const DATA_DIR     = path.join(process.cwd(), "data");
+const WRITE_DIR    = IS_VERCEL ? "/tmp/auslots-data" : DATA_DIR;
 const ITEMS_FILE      = path.join(DATA_DIR, "shop-items.json");
-const REDEMPTIONS_FILE = path.join(DATA_DIR, "redemptions.json");
+const ITEMS_FILE_WRITE = path.join(WRITE_DIR, "shop-items.json");
+const REDEMPTIONS_FILE = path.join(WRITE_DIR, "redemptions.json");
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -62,11 +66,10 @@ const DEFAULT_ITEMS: ShopItem[] = [
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(WRITE_DIR)) fs.mkdirSync(WRITE_DIR, { recursive: true });
 }
 
 function readJSON<T>(file: string, fallback: T): T {
-  ensureDir();
   try {
     if (!fs.existsSync(file)) return fallback;
     return JSON.parse(fs.readFileSync(file, "utf-8")) as T;
@@ -83,11 +86,15 @@ function writeJSON<T>(file: string, data: T) {
 // ── Shop items ────────────────────────────────────────────────────────────────
 
 export function getShopItems(): ShopItem[] {
+  // On Vercel, prefer /tmp copy if it exists (has latest inventory counts)
+  if (IS_VERCEL && fs.existsSync(ITEMS_FILE_WRITE)) {
+    return readJSON<ShopItem[]>(ITEMS_FILE_WRITE, DEFAULT_ITEMS);
+  }
   return readJSON<ShopItem[]>(ITEMS_FILE, DEFAULT_ITEMS);
 }
 
 export function saveShopItems(items: ShopItem[]) {
-  writeJSON(ITEMS_FILE, items);
+  writeJSON(ITEMS_FILE_WRITE, items);
 }
 
 export function addShopItem(data: Omit<ShopItem, "id">): ShopItem {
