@@ -1,8 +1,12 @@
 import fs from "fs";
 import path from "path";
 
-const DATA_DIR     = path.join(process.cwd(), "data");
-const SCHEDULE_FILE = path.join(DATA_DIR, "schedule.json");
+const IS_VERCEL      = !!process.env.VERCEL;
+const DATA_DIR       = path.join(process.cwd(), "data");
+const WRITE_DIR      = IS_VERCEL ? "/tmp/auslots-data" : DATA_DIR;
+
+const SCHEDULE_FILE       = path.join(DATA_DIR,  "schedule.json");
+const SCHEDULE_FILE_WRITE = path.join(WRITE_DIR, "schedule.json");
 
 export interface StreamDay {
   day: string;
@@ -27,14 +31,14 @@ const DEFAULT_SCHEDULE: StreamDay[] = [
 ];
 
 function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(WRITE_DIR)) fs.mkdirSync(WRITE_DIR, { recursive: true });
 }
 
 export function getSchedule(): StreamDay[] {
-  ensureDir();
   try {
-    if (!fs.existsSync(SCHEDULE_FILE)) return DEFAULT_SCHEDULE;
-    return JSON.parse(fs.readFileSync(SCHEDULE_FILE, "utf-8")) as StreamDay[];
+    const file = IS_VERCEL && fs.existsSync(SCHEDULE_FILE_WRITE) ? SCHEDULE_FILE_WRITE : SCHEDULE_FILE;
+    if (!fs.existsSync(file)) return DEFAULT_SCHEDULE;
+    return JSON.parse(fs.readFileSync(file, "utf-8")) as StreamDay[];
   } catch {
     return DEFAULT_SCHEDULE;
   }
@@ -42,5 +46,5 @@ export function getSchedule(): StreamDay[] {
 
 export function saveSchedule(schedule: StreamDay[]): void {
   ensureDir();
-  fs.writeFileSync(SCHEDULE_FILE, JSON.stringify(schedule, null, 2), "utf-8");
+  fs.writeFileSync(SCHEDULE_FILE_WRITE, JSON.stringify(schedule, null, 2), "utf-8");
 }
