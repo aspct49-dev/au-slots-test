@@ -34,7 +34,7 @@ const ALL_NAV_ITEMS = [
   { label: "Points Shop",  href: "/admin/shop",        icon: ShoppingBag,     adminOnly: true },
   { label: "Redemptions",  href: "/admin/redemptions", icon: ClipboardList,   adminOnly: true },
   { label: "Bonus Hunt",   href: "/admin/bonus-hunt",  icon: Flame,           adminOnly: false },
-  { label: "Raffles",      href: "/admin/raffles",     icon: Ticket,          adminOnly: true },
+  { label: "Raffles",      href: "/admin/raffles",     icon: Ticket,          adminOnly: false },
   { label: "Giveaways",    href: "/admin/giveaways",   icon: Gift,            adminOnly: false },
   { label: "Schedule",     href: "/admin/schedule",    icon: Calendar,        adminOnly: true },
   { label: "Tournament",   href: "/admin/tournament",  icon: Swords,          adminOnly: false },
@@ -43,7 +43,7 @@ const ALL_NAV_ITEMS = [
 ];
 
 // Pages a streamer is allowed to access
-const STREAMER_ALLOWED = ["/admin/bonus-hunt", "/admin/giveaways", "/admin/tournament"];
+const STREAMER_ALLOWED = ["/admin/bonus-hunt", "/admin/giveaways", "/admin/tournament", "/admin/raffles"];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoggedIn, isLoading, openLoginModal } = useAuth();

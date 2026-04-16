@@ -9,25 +9,27 @@ import {
   rollWinner,
   getTicketsForRaffle,
 } from "@/lib/raffleStore";
+import { isStreamer } from "@/lib/streamerStore";
 
 export const dynamic = "force-dynamic";
 
 const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? "auslots")
   .split(",").map(u => u.trim().toLowerCase());
 
-async function requireAdmin(): Promise<{ session: Awaited<ReturnType<typeof getIronSession<SessionData>>> } | NextResponse> {
+async function requireAdminOrStreamer(): Promise<{ session: Awaited<ReturnType<typeof getIronSession<SessionData>>> } | NextResponse> {
   const cookieStore = cookies();
   const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
-  if (!session.user || !ADMIN_USERNAMES.includes(session.user.username.toLowerCase())) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  if (!session.user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const username = session.user.username.toLowerCase();
+  const allowed = ADMIN_USERNAMES.includes(username) || isStreamer(username);
+  if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   return { session };
 }
 
 // GET — list all raffles with totals + ticket breakdowns
 export async function GET() {
   try {
-    const result = await requireAdmin();
+    const result = await requireAdminOrStreamer();
     if (result instanceof NextResponse) return result;
 
     const raffles = getRafflesWithTotals();
@@ -45,7 +47,7 @@ export async function GET() {
 // POST — create raffle
 export async function POST(req: NextRequest) {
   try {
-    const result = await requireAdmin();
+    const result = await requireAdminOrStreamer();
     if (result instanceof NextResponse) return result;
 
     const body = await req.json();
@@ -67,7 +69,7 @@ export async function POST(req: NextRequest) {
 // PATCH — roll winner or other actions
 export async function PATCH(req: NextRequest) {
   try {
-    const result = await requireAdmin();
+    const result = await requireAdminOrStreamer();
     if (result instanceof NextResponse) return result;
 
     const { id, action } = await req.json();
@@ -89,7 +91,7 @@ export async function PATCH(req: NextRequest) {
 // DELETE — delete raffle
 export async function DELETE(req: NextRequest) {
   try {
-    const result = await requireAdmin();
+    const result = await requireAdminOrStreamer();
     if (result instanceof NextResponse) return result;
 
     const { id } = await req.json();
