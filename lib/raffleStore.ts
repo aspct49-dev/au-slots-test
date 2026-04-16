@@ -1,9 +1,14 @@
 import fs from "fs";
 import path from "path";
 
-const DATA_DIR         = path.join(process.cwd(), "data");
-const RAFFLES_FILE     = path.join(DATA_DIR, "raffles.json");
-const TICKETS_FILE     = path.join(DATA_DIR, "raffle-tickets.json");
+const IS_VERCEL    = !!process.env.VERCEL;
+const DATA_DIR     = path.join(process.cwd(), "data");
+const WRITE_DIR    = IS_VERCEL ? "/tmp/auslots-data" : DATA_DIR;
+
+const RAFFLES_FILE       = path.join(DATA_DIR,  "raffles.json");
+const RAFFLES_FILE_WRITE = path.join(WRITE_DIR, "raffles.json");
+const TICKETS_FILE       = path.join(DATA_DIR,  "raffle-tickets.json");
+const TICKETS_FILE_WRITE = path.join(WRITE_DIR, "raffle-tickets.json");
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -32,14 +37,13 @@ export interface RaffleTicket {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(WRITE_DIR)) fs.mkdirSync(WRITE_DIR, { recursive: true });
 }
 
-function readJSON<T>(file: string, fallback: T): T {
-  ensureDir();
+function readJSON<T>(readFile: string, fallback: T): T {
   try {
-    if (!fs.existsSync(file)) return fallback;
-    return JSON.parse(fs.readFileSync(file, "utf-8")) as T;
+    if (!fs.existsSync(readFile)) return fallback;
+    return JSON.parse(fs.readFileSync(readFile, "utf-8")) as T;
   } catch { return fallback; }
 }
 
@@ -51,6 +55,9 @@ function writeJSON<T>(file: string, data: T) {
 // ── Raffles ───────────────────────────────────────────────────────────────────
 
 export function getRaffles(): Raffle[] {
+  if (IS_VERCEL && fs.existsSync(RAFFLES_FILE_WRITE)) {
+    return readJSON<Raffle[]>(RAFFLES_FILE_WRITE, []);
+  }
   return readJSON<Raffle[]>(RAFFLES_FILE, []);
 }
 
@@ -67,7 +74,7 @@ export function createRaffle(data: { title: string; prize: string; ticketCost: n
     createdAt: Date.now(),
   };
   raffles.unshift(raffle);
-  writeJSON(RAFFLES_FILE, raffles);
+  writeJSON(RAFFLES_FILE_WRITE, raffles);
   return raffle;
 }
 
@@ -75,12 +82,12 @@ export function deleteRaffle(id: string): boolean {
   const raffles = getRaffles();
   const filtered = raffles.filter(r => r.id !== id);
   if (filtered.length === raffles.length) return false;
-  writeJSON(RAFFLES_FILE, filtered);
+  writeJSON(RAFFLES_FILE_WRITE, filtered);
   // also delete all tickets for this raffle
   const tickets = getTicketsForRaffle(id);
   if (tickets.length) {
-    const all = readJSON<RaffleTicket[]>(TICKETS_FILE, []);
-    writeJSON(TICKETS_FILE, all.filter(t => t.raffleId !== id));
+    const all = getAllTickets();
+    writeJSON(TICKETS_FILE_WRITE, all.filter(t => t.raffleId !== id));
   }
   return true;
 }
@@ -88,6 +95,9 @@ export function deleteRaffle(id: string): boolean {
 // ── Tickets ───────────────────────────────────────────────────────────────────
 
 export function getAllTickets(): RaffleTicket[] {
+  if (IS_VERCEL && fs.existsSync(TICKETS_FILE_WRITE)) {
+    return readJSON<RaffleTicket[]>(TICKETS_FILE_WRITE, []);
+  }
   return readJSON<RaffleTicket[]>(TICKETS_FILE, []);
 }
 
@@ -123,7 +133,7 @@ export function addTickets(
     pointsSpent,
   };
   all.push(ticket);
-  writeJSON(TICKETS_FILE, all);
+  writeJSON(TICKETS_FILE_WRITE, all);
   return ticket;
 }
 
@@ -148,7 +158,7 @@ export function rollWinner(raffleId: string): Raffle | null {
   raffle.endedAt = Date.now();
   raffle.winner = winner;
 
-  writeJSON(RAFFLES_FILE, raffles);
+  writeJSON(RAFFLES_FILE_WRITE, raffles);
   return raffle;
 }
 
