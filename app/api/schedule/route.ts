@@ -6,12 +6,10 @@ import { getSchedule, saveSchedule, StreamDay } from "@/lib/scheduleStore";
 
 export const dynamic = "force-dynamic";
 
-// Public GET — used by StreamSchedule component on the home page
 export async function GET() {
-  return NextResponse.json(getSchedule());
+  return NextResponse.json(await getSchedule());
 }
 
-// Admin PUT — saves the edited schedule
 export async function PUT(req: NextRequest) {
   const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? process.env.NEXT_PUBLIC_ADMIN_USERNAMES ?? "auslots")
     .split(",").map(u => u.trim().toLowerCase());
@@ -32,6 +30,6 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Invalid schedule data" }, { status: 400 });
   }
 
-  saveSchedule(schedule);
+  await saveSchedule(schedule);
   return NextResponse.json({ ok: true });
 }

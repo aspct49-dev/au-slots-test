@@ -21,22 +21,20 @@ async function requireAdminOrStreamer(): Promise<{ session: Awaited<ReturnType<t
   const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
   if (!session.user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const username = session.user.username.toLowerCase();
-  const allowed = ADMIN_USERNAMES.includes(username) || isStreamer(username);
+  const allowed = ADMIN_USERNAMES.includes(username) || await isStreamer(username);
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   return { session };
 }
 
-// GET — list all raffles with totals + ticket breakdowns
 export async function GET() {
   try {
     const result = await requireAdminOrStreamer();
     if (result instanceof NextResponse) return result;
 
-    const raffles = getRafflesWithTotals();
-    const withTickets = raffles.map(r => ({
-      ...r,
-      tickets: getTicketsForRaffle(r.id),
-    }));
+    const raffles = await getRafflesWithTotals();
+    const withTickets = await Promise.all(
+      raffles.map(async r => ({ ...r, tickets: await getTicketsForRaffle(r.id) }))
+    );
     return NextResponse.json(withTickets);
   } catch (err) {
     console.error("[GET /api/admin/raffles]", err);
@@ -44,7 +42,6 @@ export async function GET() {
   }
 }
 
-// POST — create raffle
 export async function POST(req: NextRequest) {
   try {
     const result = await requireAdminOrStreamer();
@@ -57,16 +54,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
     }
 
-    const raffle = createRaffle({ title, prize, ticketCost: Number(ticketCost) });
+    const raffle = await createRaffle({ title, prize, ticketCost: Number(ticketCost) });
     return NextResponse.json(raffle, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/raffles]", err);
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
 
-// PATCH — roll winner or other actions
 export async function PATCH(req: NextRequest) {
   try {
     const result = await requireAdminOrStreamer();
@@ -76,7 +71,7 @@ export async function PATCH(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
     if (action === "roll") {
-      const updated = rollWinner(id);
+      const updated = await rollWinner(id);
       if (!updated) return NextResponse.json({ error: "No tickets or raffle not found" }, { status: 400 });
       return NextResponse.json(updated);
     }
@@ -88,7 +83,6 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// DELETE — delete raffle
 export async function DELETE(req: NextRequest) {
   try {
     const result = await requireAdminOrStreamer();
@@ -97,7 +91,7 @@ export async function DELETE(req: NextRequest) {
     const { id } = await req.json();
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-    const ok = deleteRaffle(id);
+    const ok = await deleteRaffle(id);
     if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -4,6 +4,6 @@ import { getShopItems } from "@/lib/shopStore";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const items = getShopItems();
+  const items = await getShopItems();
   return NextResponse.json(items);
 }

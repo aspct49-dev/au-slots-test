@@ -16,15 +16,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing redemptionId" }, { status: 400 });
   }
 
-  // Verify the redemption belongs to this user
-  const redemptions = getRedemptions();
+  const redemptions = await getRedemptions();
   const r = redemptions.find(r => r.id === redemptionId);
   if (!r) return NextResponse.json({ error: "Redemption not found" }, { status: 404 });
   if (r.username.toLowerCase() !== session.user.username.toLowerCase()) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const updated = updateRedemptionInfo(redemptionId, {
+  const updated = await updateRedemptionInfo(redemptionId, {
     viperSpinEmail:  viperSpinEmail  ?? "",
     zestyBetInfo:    zestyBetInfo    ?? "",
     discordUsername: discordUsername ?? "",

@@ -4,6 +4,8 @@ import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { updateShopItem, deleteShopItem } from "@/lib/shopStore";
 
+export const dynamic = "force-dynamic";
+
 const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? "auslots")
   .split(",").map(u => u.trim().toLowerCase());
 
@@ -20,7 +22,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   if (denied) return denied;
 
   const body = await req.json();
-  const updated = updateShopItem(params.id, body);
+  const updated = await updateShopItem(params.id, body);
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(updated);
 }
@@ -29,7 +31,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   const denied = await requireAdmin();
   if (denied) return denied;
 
-  const ok = deleteShopItem(params.id);
+  const ok = await deleteShopItem(params.id);
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ ok: true });
 }

@@ -18,18 +18,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid guess amount" }, { status: 400 });
     }
 
-    const hunt = getCurrentHunt();
+    const hunt = await getCurrentHunt();
     if (!hunt) return NextResponse.json({ error: "No active hunt" }, { status: 404 });
     if (hunt.status !== "active") {
       return NextResponse.json({ error: "Entries are closed" }, { status: 409 });
     }
 
     const username = session.user.username;
-    const existing = getUserGuess(hunt.id, username);
+    const existing = await getUserGuess(hunt.id, username);
 
     const result = existing
-      ? updateGuess(hunt.id, username, guess)
-      : addGuess(hunt.id, username, guess);
+      ? await updateGuess(hunt.id, username, guess)
+      : await addGuess(hunt.id, username, guess);
 
     return NextResponse.json({ ok: true, guess: result, updated: !!existing });
   } catch (err) {

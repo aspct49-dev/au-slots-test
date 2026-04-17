@@ -5,6 +5,8 @@ import { SessionData, sessionOptions } from "@/lib/session";
 import { getRedemptions, fulfillRedemption, rejectRedemption, incrementInventory } from "@/lib/shopStore";
 import { addBotrixPoints } from "@/lib/botrix";
 
+export const dynamic = "force-dynamic";
+
 const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? "auslots")
   .split(",").map(u => u.trim().toLowerCase());
 
@@ -23,7 +25,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const status = searchParams.get("status");
 
-  let redemptions = getRedemptions();
+  let redemptions = await getRedemptions();
   if (status === "pending" || status === "fulfilled" || status === "rejected") {
     redemptions = redemptions.filter(r => r.status === status);
   }
@@ -41,27 +43,25 @@ export async function PATCH(req: NextRequest) {
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   if (!action || action === "fulfill") {
-    const updated = fulfillRedemption(id);
+    const updated = await fulfillRedemption(id);
     if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(updated);
   }
 
   if (action === "reject") {
-    const redemptions = getRedemptions();
+    const redemptions = await getRedemptions();
     const r = redemptions.find(r => r.id === id);
     if (!r) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const updated = rejectRedemption(id, reason ?? "");
+    const updated = await rejectRedemption(id, reason ?? "");
     if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    // Auto-return points and restore inventory
     try {
       await addBotrixPoints(r.username, r.pointCost);
-      incrementInventory(r.itemId);
+      await incrementInventory(r.itemId);
       console.log(`[Reject] Returned ${r.pointCost} pts to ${r.username} for "${r.itemName}"`);
     } catch (err) {
       console.error(`[Reject] Failed to return points to ${r.username}:`, err);
-      // Still return the updated redemption — points return failure shouldn't block the rejection
     }
 
     return NextResponse.json(updated);

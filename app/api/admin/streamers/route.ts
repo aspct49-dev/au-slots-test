@@ -24,7 +24,7 @@ export async function GET() {
     if (!session.user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
-    return NextResponse.json(getStreamers());
+    return NextResponse.json(await getStreamers());
   } catch (err) {
     console.error("[GET /api/admin/streamers]", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     if (isAdmin(username)) {
       return NextResponse.json({ error: "That user is already an admin" }, { status: 409 });
     }
-    const list = addStreamer(username);
+    const list = await addStreamer(username);
     return NextResponse.json(list);
   } catch (err) {
     console.error("[POST /api/admin/streamers]", err);
@@ -65,7 +65,7 @@ export async function DELETE(req: NextRequest) {
     if (!username || typeof username !== "string") {
       return NextResponse.json({ error: "Missing username" }, { status: 400 });
     }
-    const list = removeStreamer(username);
+    const list = await removeStreamer(username);
     return NextResponse.json(list);
   } catch (err) {
     console.error("[DELETE /api/admin/streamers]", err);

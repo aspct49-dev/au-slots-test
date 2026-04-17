@@ -14,7 +14,7 @@ async function requireAdminOrStreamer(): Promise<NextResponse | null> {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
   if (!session.user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const username = session.user.username;
-  const allowed = ADMIN_USERNAMES.includes(username.toLowerCase()) || isStreamer(username);
+  const allowed = ADMIN_USERNAMES.includes(username.toLowerCase()) || await isStreamer(username);
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   return null;
 }
@@ -24,7 +24,7 @@ export async function GET() {
   try {
     const denied = await requireAdminOrStreamer();
     if (denied) return denied;
-    return NextResponse.json(getCurrentHunt());
+    return NextResponse.json(await getCurrentHunt());
   } catch (err) {
     console.error("[GET /api/admin/hunt]", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
@@ -42,12 +42,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const existing = getCurrentHunt();
+    const existing = await getCurrentHunt();
     if (existing && existing.status !== "ended") {
       return NextResponse.json({ error: "A hunt is already active" }, { status: 409 });
     }
 
-    const hunt = startHunt(+startingBalance, +numberOfBonuses);
+    const hunt = await startHunt(+startingBalance, +numberOfBonuses);
     return NextResponse.json(hunt, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/hunt]", err);
@@ -64,7 +64,7 @@ export async function PATCH(req: NextRequest) {
     const { action, endingBalance } = await req.json();
 
     if (action === "close") {
-      const hunt = closeEntries();
+      const hunt = await closeEntries();
       if (!hunt) return NextResponse.json({ error: "No active hunt to close" }, { status: 400 });
       return NextResponse.json(hunt);
     }
@@ -73,12 +73,12 @@ export async function PATCH(req: NextRequest) {
       if (typeof endingBalance !== "number") {
         return NextResponse.json({ error: "endingBalance required" }, { status: 400 });
       }
-      const result = endHunt(endingBalance);
+      const result = await endHunt(endingBalance);
       return NextResponse.json(result);
     }
 
     if (action === "clear") {
-      clearHunt();
+      await clearHunt();
       return NextResponse.json({ ok: true });
     }
 

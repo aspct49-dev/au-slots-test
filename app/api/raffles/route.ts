@@ -10,12 +10,14 @@ export async function GET() {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
   const username = session.user?.username ?? null;
 
-  const raffles = getRafflesWithTotals();
+  const raffles = await getRafflesWithTotals();
 
-  const result = raffles.map(r => ({
-    ...r,
-    myTickets: username ? getUserTicketCount(r.id, username) : 0,
-  }));
+  const result = await Promise.all(
+    raffles.map(async r => ({
+      ...r,
+      myTickets: username ? await getUserTicketCount(r.id, username) : 0,
+    }))
+  );
 
   return NextResponse.json(result);
 }

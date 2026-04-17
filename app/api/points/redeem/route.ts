@@ -8,7 +8,7 @@ import { getShopItems, decrementInventory, addRedemption, getRedemptions } from 
 const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? process.env.NEXT_PUBLIC_ADMIN_USERNAMES ?? "auslots")
   .split(",").map(u => u.trim().toLowerCase());
 
-const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
 interface RedeemBody {
   itemId: string;
@@ -36,26 +36,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   }
 
-  // Verify item exists and is in stock
-  const items = getShopItems();
+  const items = await getShopItems();
   const item = items.find(i => i.id === itemId);
-  if (!item) {
-    return NextResponse.json({ error: "Item not found" }, { status: 404 });
-  }
-  if (item.inventory <= 0) {
-    return NextResponse.json({ error: "This item is sold out" }, { status: 409 });
-  }
+  if (!item) return NextResponse.json({ error: "Item not found" }, { status: 404 });
+  if (item.inventory <= 0) return NextResponse.json({ error: "This item is sold out" }, { status: 409 });
 
   const username = session.user.username;
   const uid = session.user.id;
   const isAdmin = ADMIN_USERNAMES.includes(username.toLowerCase());
 
-  // 7-day cooldown check (admins exempt)
   if (!isAdmin) {
-    const allRedemptions = getRedemptions();
+    const allRedemptions = await getRedemptions();
     const userRedemptions = allRedemptions.filter(r => r.username.toLowerCase() === username.toLowerCase());
 
-    // Block if there's a pending redemption (can't stack)
     const hasPending = userRedemptions.some(r => r.status === "pending");
     if (hasPending) {
       return NextResponse.json(
@@ -64,7 +57,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Block if last fulfilled redemption was within 7 days
     const lastFulfilled = userRedemptions
       .filter(r => r.status === "fulfilled")
       .sort((a, b) => b.redeemedAt - a.redeemedAt)[0];
@@ -72,8 +64,7 @@ export async function POST(req: NextRequest) {
     if (lastFulfilled) {
       const msElapsed = Date.now() - lastFulfilled.redeemedAt;
       if (msElapsed < COOLDOWN_MS) {
-        const msRemaining = COOLDOWN_MS - msElapsed;
-        const daysLeft = Math.ceil(msRemaining / (24 * 60 * 60 * 1000));
+        const daysLeft = Math.ceil((COOLDOWN_MS - msElapsed) / (24 * 60 * 60 * 1000));
         return NextResponse.json(
           { error: `You can redeem again in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}. Items can only be redeemed once every 7 days.` },
           { status: 429 }
@@ -82,7 +73,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Re-fetch live balance from Botrix to prevent stale-cache exploits
   let currentPoints: number;
   try {
     currentPoints = await getBotrixPoints(username);
@@ -92,13 +82,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (currentPoints < pointCost) {
-    return NextResponse.json(
-      { error: "Insufficient points", points: currentPoints },
-      { status: 402 }
-    );
+    return NextResponse.json({ error: "Insufficient points", points: currentPoints }, { status: 402 });
   }
 
-  // Deduct points via Botrix
   let newBalance: number;
   try {
     newBalance = await deductBotrixPoints(uid, username, pointCost);
@@ -107,27 +93,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to deduct points" }, { status: 502 });
   }
 
-  // Decrement inventory
-  decrementInventory(itemId);
+  await decrementInventory(itemId);
 
-  // Log the redemption
-  const redemption = addRedemption({
-    username,
-    itemId,
-    itemName,
+  const redemption = await addRedemption({
+    username, itemId, itemName,
     spinCount: item.spinCount,
     pointCost,
   });
 
-  // Sync the new balance back into the session
   session.user.points = newBalance;
   await session.save();
 
-  console.log(`[Redeem] ${username} redeemed "${itemName}" (${itemId}) for ${pointCost} pts. New balance: ${newBalance}`);
+  console.log(`[Redeem] ${username} redeemed "${itemName}" for ${pointCost} pts. New balance: ${newBalance}`);
 
-  const redeemDesc = item.spinCount > 0
-    ? `${item.spinCount} free spins on ${itemName}`
-    : itemName;
+  const redeemDesc = item.spinCount > 0 ? `${item.spinCount} free spins on ${itemName}` : itemName;
 
   return NextResponse.json({
     ok: true,

@@ -4,6 +4,8 @@ import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { getShopItems, addShopItem } from "@/lib/shopStore";
 
+export const dynamic = "force-dynamic";
+
 const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? "auslots")
   .split(",").map(u => u.trim().toLowerCase());
 
@@ -18,7 +20,7 @@ async function requireAdmin(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
-  return NextResponse.json(getShopItems());
+  return NextResponse.json(await getShopItems());
 }
 
 export async function POST(req: NextRequest) {
@@ -32,6 +34,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const item = addShopItem({ gameName, provider, spinCount: +spinCount, pointCost: +pointCost, inventory: +inventory, maxInventory: +maxInventory, gradient, providerColor, imageUrl });
+  const item = await addShopItem({
+    gameName, provider,
+    spinCount: +spinCount, pointCost: +pointCost,
+    inventory: +inventory, maxInventory: +maxInventory,
+    gradient, providerColor, imageUrl,
+  });
   return NextResponse.json(item, { status: 201 });
 }

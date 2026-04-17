@@ -1,10 +1,4 @@
-import fs from "fs";
-import { DATA_DIR, WRITE_DIR } from "./dataDir";
-
-const IS_PROD = process.env.NODE_ENV === "production";
-
-const SCHEDULE_FILE       = `${DATA_DIR}/schedule.json`;
-const SCHEDULE_FILE_WRITE = `${WRITE_DIR}/schedule.json`;
+import pool from "./db";
 
 export interface StreamDay {
   day: string;
@@ -18,31 +12,49 @@ export interface StreamDay {
   off?: boolean;
 }
 
-const DEFAULT_SCHEDULE: StreamDay[] = [
-  { day: "MON", fullDay: "Monday",    streamer: "AUSlots", time: "7PM AEST", type: "Main Stream",    color: "#00ff87", isMain: true },
-  { day: "TUE", fullDay: "Tuesday",   streamer: "AUSlots", time: "7PM AEST", type: "Main Stream",    color: "#00ff87", isMain: true },
-  { day: "WED", fullDay: "Wednesday", streamer: "AUSlots", time: "7PM AEST", type: "Main Stream",    color: "#00ff87", isMain: true },
-  { day: "THU", fullDay: "Thursday",  streamer: "AUSlots", time: "7PM AEST", type: "Big Hunt Night", color: "#fbbf24", isMain: true, special: true },
-  { day: "FRI", fullDay: "Friday",    streamer: "AUSlots", time: "7PM AEST", type: "Main Stream",    color: "#00ff87", isMain: true },
-  { day: "SAT", fullDay: "Saturday",  streamer: "Guest Streamer", time: "TBD", type: "Guest Night",  color: "#a78bfa", isMain: false },
-  { day: "SUN", fullDay: "Sunday",    streamer: "–",       time: "–",        type: "Rest Day",       color: "#444444", isMain: false, off: true },
-];
-
-function ensureDir() {
-  if (!fs.existsSync(WRITE_DIR)) fs.mkdirSync(WRITE_DIR, { recursive: true });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToDay(row: any): StreamDay {
+  return {
+    day:      row.day,
+    fullDay:  row.full_day,
+    streamer: row.streamer,
+    time:     row.time,
+    type:     row.type,
+    color:    row.color,
+    isMain:   row.is_main,
+    special:  row.special  ?? false,
+    off:      row.off      ?? false,
+  };
 }
 
-export function getSchedule(): StreamDay[] {
+export async function getSchedule(): Promise<StreamDay[]> {
+  const ORDER = ["MON","TUE","WED","THU","FRI","SAT","SUN"];
+  const { rows } = await pool.query("SELECT * FROM schedule");
+  const days = rows.map(rowToDay);
+  days.sort((a, b) => ORDER.indexOf(a.day) - ORDER.indexOf(b.day));
+  return days;
+}
+
+export async function saveSchedule(schedule: StreamDay[]): Promise<void> {
+  const client = await pool.connect();
   try {
-    const file = IS_PROD && fs.existsSync(SCHEDULE_FILE_WRITE) ? SCHEDULE_FILE_WRITE : SCHEDULE_FILE;
-    if (!fs.existsSync(file)) return DEFAULT_SCHEDULE;
-    return JSON.parse(fs.readFileSync(file, "utf-8")) as StreamDay[];
-  } catch {
-    return DEFAULT_SCHEDULE;
+    await client.query("BEGIN");
+    for (const d of schedule) {
+      await client.query(
+        `INSERT INTO schedule (day, full_day, streamer, time, type, color, is_main, special, off)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+         ON CONFLICT (day) DO UPDATE SET
+           full_day=$2, streamer=$3, time=$4, type=$5, color=$6,
+           is_main=$7, special=$8, off=$9`,
+        [d.day, d.fullDay, d.streamer, d.time, d.type, d.color,
+         d.isMain, d.special ?? false, d.off ?? false]
+      );
+    }
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
   }
-}
-
-export function saveSchedule(schedule: StreamDay[]): void {
-  ensureDir();
-  fs.writeFileSync(SCHEDULE_FILE_WRITE, JSON.stringify(schedule, null, 2), "utf-8");
 }

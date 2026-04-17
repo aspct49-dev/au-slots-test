@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const raffle = getRaffleById(raffleId);
+  const raffle = await getRaffleById(raffleId);
   if (!raffle) return NextResponse.json({ error: "Raffle not found" }, { status: 404 });
   if (raffle.status !== "active") {
     return NextResponse.json({ error: "This raffle is no longer active" }, { status: 409 });
@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
   const totalCost = raffle.ticketCost * quantity;
   const { username, id: userId } = session.user;
 
-  // Verify live balance
   let currentPoints: number;
   try {
     currentPoints = await getBotrixPoints(username);
@@ -41,7 +40,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Deduct points
   let newBalance: number;
   try {
     newBalance = await deductBotrixPoints(userId, username, totalCost);
@@ -49,10 +47,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to deduct points" }, { status: 502 });
   }
 
-  // Record tickets
-  addTickets(raffleId, username, userId, quantity, totalCost);
+  await addTickets(raffleId, username, userId, quantity, totalCost);
 
-  // Sync session
   session.user.points = newBalance;
   await session.save();
 

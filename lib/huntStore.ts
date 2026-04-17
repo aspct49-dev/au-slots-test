@@ -1,12 +1,4 @@
-import fs from "fs";
-import { DATA_DIR, WRITE_DIR } from "./dataDir";
-
-const IS_PROD = process.env.NODE_ENV === "production";
-
-const HUNT_FILE         = `${DATA_DIR}/hunt.json`;
-const HUNT_FILE_WRITE   = `${WRITE_DIR}/hunt.json`;
-const GUESSES_FILE      = `${DATA_DIR}/hunt-guesses.json`;
-const GUESSES_FILE_WRITE = `${WRITE_DIR}/hunt-guesses.json`;
+import pool from "./db";
 
 export type HuntStatus = "active" | "closed" | "ended";
 
@@ -30,60 +22,65 @@ export interface Guess {
   submittedAt: number;
 }
 
-// ── helpers ────────────────────────────────────────────────────────────────────
-
-function ensureDir() {
-  if (!fs.existsSync(WRITE_DIR)) fs.mkdirSync(WRITE_DIR, { recursive: true });
-}
-
-function readJSON<T>(file: string, fallback: T): T {
-  try {
-    if (!fs.existsSync(file)) return fallback;
-    return JSON.parse(fs.readFileSync(file, "utf-8")) as T;
-  } catch { return fallback; }
-}
-
-function writeJSON<T>(file: string, data: T) {
-  ensureDir();
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf-8");
-}
-
-// ── hunt ───────────────────────────────────────────────────────────────────────
-
-export function getCurrentHunt(): Hunt | null {
-  if (IS_PROD && fs.existsSync(HUNT_FILE_WRITE)) {
-    return readJSON<Hunt | null>(HUNT_FILE_WRITE, null);
-  }
-  return readJSON<Hunt | null>(HUNT_FILE, null);
-}
-
-export function startHunt(startingBalance: number, numberOfBonuses: number): Hunt {
-  const hunt: Hunt = {
-    id: Date.now().toString(),
-    startingBalance,
-    numberOfBonuses,
-    endingBalance: null,
-    status: "active",
-    startedAt: Date.now(),
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToHunt(row: any): Hunt {
+  return {
+    id:               row.id,
+    startingBalance:  Number(row.starting_balance),
+    numberOfBonuses:  row.number_of_bonuses,
+    endingBalance:    row.ending_balance != null ? Number(row.ending_balance) : null,
+    status:           row.status,
+    startedAt:        Number(row.started_at),
+    closedAt:         row.closed_at  ? Number(row.closed_at)  : undefined,
+    endedAt:          row.ended_at   ? Number(row.ended_at)   : undefined,
+    winnerGuessId:    row.winner_guess_id ?? undefined,
   };
-  writeJSON(HUNT_FILE_WRITE, hunt);
-  return hunt;
 }
 
-export function closeEntries(): Hunt | null {
-  const hunt = getCurrentHunt();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToGuess(row: any): Guess {
+  return {
+    id:          row.id,
+    huntId:      row.hunt_id,
+    username:    row.username,
+    guess:       Number(row.guess),
+    submittedAt: Number(row.submitted_at),
+  };
+}
+
+// ── Hunt ──────────────────────────────────────────────────────────────────────
+
+export async function getCurrentHunt(): Promise<Hunt | null> {
+  const { rows } = await pool.query(
+    "SELECT * FROM hunts WHERE cleared_at IS NULL ORDER BY started_at DESC LIMIT 1"
+  );
+  return rows[0] ? rowToHunt(rows[0]) : null;
+}
+
+export async function startHunt(startingBalance: number, numberOfBonuses: number): Promise<Hunt> {
+  const { rows } = await pool.query(
+    `INSERT INTO hunts (id, starting_balance, number_of_bonuses, ending_balance, status, started_at)
+     VALUES ($1,$2,$3,NULL,'active',$4) RETURNING *`,
+    [Date.now().toString(), startingBalance, numberOfBonuses, Date.now()]
+  );
+  return rowToHunt(rows[0]);
+}
+
+export async function closeEntries(): Promise<Hunt | null> {
+  const hunt = await getCurrentHunt();
   if (!hunt || hunt.status !== "active") return null;
-  hunt.status = "closed";
-  hunt.closedAt = Date.now();
-  writeJSON(HUNT_FILE_WRITE, hunt);
-  return hunt;
+  const { rows } = await pool.query(
+    "UPDATE hunts SET status='closed', closed_at=$2 WHERE id=$1 RETURNING *",
+    [hunt.id, Date.now()]
+  );
+  return rows[0] ? rowToHunt(rows[0]) : null;
 }
 
-export function endHunt(endingBalance: number): { hunt: Hunt; winner: Guess | null } {
-  const hunt = getCurrentHunt();
+export async function endHunt(endingBalance: number): Promise<{ hunt: Hunt; winner: Guess | null }> {
+  const hunt = await getCurrentHunt();
   if (!hunt || hunt.status === "ended") return { hunt: hunt!, winner: null };
 
-  const guesses = getGuessesForHunt(hunt.id);
+  const guesses = await getGuessesForHunt(hunt.id);
   let winner: Guess | null = null;
 
   if (guesses.length > 0) {
@@ -92,52 +89,54 @@ export function endHunt(endingBalance: number): { hunt: Hunt; winner: Guess | nu
     );
   }
 
-  hunt.status = "ended";
-  hunt.endingBalance = endingBalance;
-  hunt.endedAt = Date.now();
-  hunt.winnerGuessId = winner?.id;
-  writeJSON(HUNT_FILE_WRITE, hunt);
+  const { rows } = await pool.query(
+    `UPDATE hunts SET
+       status='ended', ending_balance=$2, ended_at=$3, winner_guess_id=$4
+     WHERE id=$1 RETURNING *`,
+    [hunt.id, endingBalance, Date.now(), winner?.id ?? null]
+  );
 
-  return { hunt, winner };
+  return { hunt: rowToHunt(rows[0]), winner };
 }
 
-export function clearHunt() {
-  ensureDir();
-  if (fs.existsSync(HUNT_FILE_WRITE)) fs.unlinkSync(HUNT_FILE_WRITE);
+export async function clearHunt(): Promise<void> {
+  const hunt = await getCurrentHunt();
+  if (!hunt) return;
+  await pool.query("UPDATE hunts SET cleared_at=$2 WHERE id=$1", [hunt.id, Date.now()]);
 }
 
-// ── guesses ────────────────────────────────────────────────────────────────────
+// ── Guesses ───────────────────────────────────────────────────────────────────
 
-export function getAllGuesses(): Guess[] {
-  if (IS_PROD && fs.existsSync(GUESSES_FILE_WRITE)) {
-    return readJSON<Guess[]>(GUESSES_FILE_WRITE, []);
-  }
-  return readJSON<Guess[]>(GUESSES_FILE, []);
+export async function getGuessesForHunt(huntId: string): Promise<Guess[]> {
+  const { rows } = await pool.query(
+    "SELECT * FROM hunt_guesses WHERE hunt_id=$1 ORDER BY submitted_at ASC",
+    [huntId]
+  );
+  return rows.map(rowToGuess);
 }
 
-export function getGuessesForHunt(huntId: string): Guess[] {
-  return getAllGuesses().filter(g => g.huntId === huntId);
+export async function getUserGuess(huntId: string, username: string): Promise<Guess | null> {
+  const { rows } = await pool.query(
+    "SELECT * FROM hunt_guesses WHERE hunt_id=$1 AND LOWER(username)=LOWER($2)",
+    [huntId, username]
+  );
+  return rows[0] ? rowToGuess(rows[0]) : null;
 }
 
-export function getUserGuess(huntId: string, username: string): Guess | null {
-  const guesses = getGuessesForHunt(huntId);
-  return guesses.find(g => g.username.toLowerCase() === username.toLowerCase()) ?? null;
+export async function addGuess(huntId: string, username: string, guess: number): Promise<Guess> {
+  const { rows } = await pool.query(
+    `INSERT INTO hunt_guesses (id, hunt_id, username, guess, submitted_at)
+     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+    [Date.now().toString(), huntId, username, guess, Date.now()]
+  );
+  return rowToGuess(rows[0]);
 }
 
-export function addGuess(huntId: string, username: string, guess: number): Guess {
-  const all = getAllGuesses();
-  const entry: Guess = { id: Date.now().toString(), huntId, username, guess, submittedAt: Date.now() };
-  all.push(entry);
-  writeJSON(GUESSES_FILE_WRITE, all);
-  return entry;
-}
-
-export function updateGuess(huntId: string, username: string, newGuess: number): Guess | null {
-  const all = getAllGuesses();
-  const idx = all.findIndex(g => g.huntId === huntId && g.username.toLowerCase() === username.toLowerCase());
-  if (idx === -1) return null;
-  all[idx].guess = newGuess;
-  all[idx].submittedAt = Date.now();
-  writeJSON(GUESSES_FILE_WRITE, all);
-  return all[idx];
+export async function updateGuess(huntId: string, username: string, newGuess: number): Promise<Guess | null> {
+  const { rows } = await pool.query(
+    `UPDATE hunt_guesses SET guess=$3, submitted_at=$4
+     WHERE hunt_id=$1 AND LOWER(username)=LOWER($2) RETURNING *`,
+    [huntId, username, newGuess, Date.now()]
+  );
+  return rows[0] ? rowToGuess(rows[0]) : null;
 }

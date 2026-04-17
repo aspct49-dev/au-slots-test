@@ -14,7 +14,7 @@ export async function GET() {
   }
 
   const username = session.user.username.toLowerCase();
-  const all = getRedemptions();
+  const all = await getRedemptions();
   const mine = all.filter(r => r.username.toLowerCase() === username);
 
   return NextResponse.json(mine);
