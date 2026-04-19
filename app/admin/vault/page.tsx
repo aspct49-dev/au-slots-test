@@ -79,16 +79,41 @@ export default function AdminVaultPage() {
           </div>
         )}
 
-        <button
-          onClick={save}
-          disabled={saving || !current || !max}
-          className="w-full py-3 rounded-xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-sm tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {saving ? "Saving..." : "Save Vault"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={save}
+            disabled={saving || !current || !max}
+            className="flex-1 py-3 rounded-xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-sm tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {saving ? "Saving..." : "Save Vault"}
+          </button>
+          <button
+            onClick={async () => {
+              if (!confirm("Reset vault to $0? This cannot be undone.")) return;
+              setCurrent("0");
+              setSaving(true);
+              try {
+                const res = await fetch("/api/admin/vault", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ currentAmount: 0, maxAmount: Number(max) || 5000 }),
+                });
+                if (res.ok) setMsg("Vault reset to $0!");
+                else setMsg("Error resetting.");
+              } catch {
+                setMsg("Error resetting.");
+              }
+              setSaving(false);
+            }}
+            disabled={saving}
+            className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-black text-sm tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Reset
+          </button>
+        </div>
 
         {msg && (
-          <p className={`text-center text-sm font-bold ${msg === "Saved!" ? "text-[#00ff87]" : "text-red-400"}`}>
+          <p className={`text-center text-sm font-bold ${msg.includes("Error") ? "text-red-400" : "text-[#00ff87]"}`}>
             {msg}
           </p>
         )}
