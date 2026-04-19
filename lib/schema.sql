@@ -90,6 +90,14 @@ CREATE TABLE IF NOT EXISTS streamers (
   username TEXT PRIMARY KEY
 );
 
+CREATE TABLE IF NOT EXISTS stream_schedule (
+  id    SERIAL PRIMARY KEY,
+  date  TEXT   NOT NULL UNIQUE,
+  medi  TEXT   NOT NULL DEFAULT 'OFF',
+  layto TEXT   NOT NULL DEFAULT 'OFF',
+  aus   TEXT   NOT NULL DEFAULT 'OFF'
+);
+
 -- Default schedule (insert only if table is empty)
 INSERT INTO schedule (day, full_day, streamer, time, type, color, is_main, special, off)
 VALUES
