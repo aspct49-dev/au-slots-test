@@ -22,6 +22,7 @@ import {
   ClipboardList,
   Flame,
   Tv2,
+  Coins,
 } from "lucide-react";
 
 const ADMIN_USERNAMES = (process.env.NEXT_PUBLIC_ADMIN_USERNAMES ?? "auslots")
@@ -36,6 +37,7 @@ const ALL_NAV_ITEMS = [
   { label: "Bonus Hunt",   href: "/admin/bonus-hunt",  icon: Flame,           adminOnly: false },
   { label: "Raffles",      href: "/admin/raffles",     icon: Ticket,          adminOnly: false },
   { label: "Giveaways",    href: "/admin/giveaways",   icon: Gift,            adminOnly: false },
+  { label: "Vault",        href: "/admin/vault",       icon: Coins,           adminOnly: true },
   { label: "Schedule",     href: "/admin/schedule",    icon: Calendar,        adminOnly: true },
   { label: "Tournament",   href: "/admin/tournament",  icon: Swords,          adminOnly: false },
   { label: "Users",        href: "/admin/users",       icon: Users,           adminOnly: true },

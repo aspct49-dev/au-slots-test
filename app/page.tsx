@@ -42,11 +42,11 @@ const features = [
   },
   {
     icon: <Gift size={28} />,
-    title: "GIVEAWAYS",
+    title: "THE VAULT",
     description:
-      "Regular giveaways for our community members. Follow us across platforms to maximize your chances.",
+      "Watch the vault fill up after every stream. When it hits max — something big drops for the community.",
     color: "#fbbf24",
-    href: "/giveaways",
+    href: "/vault",
     gradient: "from-[#fbbf24]/10 to-transparent",
   },
   {

@@ -206,10 +206,10 @@ export default function HeroSection() {
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
-            href="/leaderboard"
-            className="group flex items-center gap-2 w-full sm:w-auto justify-center px-8 py-4 rounded-xl bg-white/5 text-white font-black text-sm tracking-widest border border-white/10 hover:border-[#00ff87]/40 hover:bg-[#00ff87]/10 hover:text-[#00ff87] transition-all duration-200 active:scale-95"
+            href="/vault"
+            className="group flex items-center gap-2 w-full sm:w-auto justify-center px-8 py-4 rounded-xl bg-white/5 text-white font-black text-sm tracking-widest border border-white/10 hover:border-[#fbbf24]/40 hover:bg-[#fbbf24]/10 hover:text-[#fbbf24] transition-all duration-200 active:scale-95"
           >
-            LEADERBOARD
+            THE VAULT
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </motion.div>

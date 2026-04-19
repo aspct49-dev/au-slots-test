@@ -83,7 +83,7 @@ const navLinks = [
   { name: "STORE", href: "/points-shop" },
   { name: "HUNTS", href: "/bonus-hunt" },
   { name: "RAFFLES", href: "/raffles" },
-  { name: "GIVEAWAYS", href: "/giveaways" },
+  { name: "VAULT", href: "/vault" },
 ];
 
 const ADMIN_USERNAMES = (process.env.NEXT_PUBLIC_ADMIN_USERNAMES ?? "auslots")
