@@ -37,16 +37,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  /** Load session from server on mount */
+  /** Load session from server on mount, then refresh live points */
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => r.json())
-      .then((data) => {
-        if (data.user) setUser(data.user);
+      .then(async (data) => {
+        if (data.user) {
+          setUser(data.user);
+          // Refresh live Botrix points in background
+          try {
+            const res = await fetch("/api/points/balance");
+            if (res.ok) {
+              const { points } = await res.json();
+              setUser(prev => prev ? { ...prev, points } : prev);
+            }
+          } catch { /* non-fatal */ }
+        }
       })
-      .catch(() => {
-        // Session fetch failed — treat as logged out
-      })
+      .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
 
