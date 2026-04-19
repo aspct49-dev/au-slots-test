@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
-import { getCurrentHunt, startHunt, closeEntries, endHunt, clearHunt } from "@/lib/huntStore";
+import { getCurrentHunt, startHunt, closeEntries, endHunt, clearHunt, setCasinoElementsUrl } from "@/lib/huntStore";
 import { isStreamer } from "@/lib/streamerStore";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const denied = await requireAdminOrStreamer();
     if (denied) return denied;
 
-    const { startingBalance, numberOfBonuses } = await req.json();
+    const { startingBalance, numberOfBonuses, casinoElementsUrl } = await req.json();
     if (!startingBalance || !numberOfBonuses) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "A hunt is already active" }, { status: 409 });
     }
 
-    const hunt = await startHunt(+startingBalance, +numberOfBonuses);
+    const hunt = await startHunt(+startingBalance, +numberOfBonuses, casinoElementsUrl);
     return NextResponse.json(hunt, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/hunt]", err);
@@ -61,7 +61,7 @@ export async function PATCH(req: NextRequest) {
     const denied = await requireAdminOrStreamer();
     if (denied) return denied;
 
-    const { action, endingBalance } = await req.json();
+    const { action, endingBalance, url, huntId } = await req.json();
 
     if (action === "close") {
       const hunt = await closeEntries();
@@ -80,6 +80,12 @@ export async function PATCH(req: NextRequest) {
     if (action === "clear") {
       await clearHunt();
       return NextResponse.json({ ok: true });
+    }
+
+    if (action === "setUrl") {
+      const hunt = await setCasinoElementsUrl(huntId, url ?? "");
+      if (!hunt) return NextResponse.json({ error: "Hunt not found" }, { status: 404 });
+      return NextResponse.json(hunt);
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });

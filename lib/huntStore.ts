@@ -12,6 +12,7 @@ export interface Hunt {
   closedAt?: number;
   endedAt?: number;
   winnerGuessId?: string;
+  casinoElementsUrl?: string;
 }
 
 export interface Guess {
@@ -33,7 +34,8 @@ function rowToHunt(row: any): Hunt {
     startedAt:        Number(row.started_at),
     closedAt:         row.closed_at  ? Number(row.closed_at)  : undefined,
     endedAt:          row.ended_at   ? Number(row.ended_at)   : undefined,
-    winnerGuessId:    row.winner_guess_id ?? undefined,
+    winnerGuessId:      row.winner_guess_id ?? undefined,
+    casinoElementsUrl:  row.casino_elements_url ?? undefined,
   };
 }
 
@@ -57,13 +59,21 @@ export async function getCurrentHunt(): Promise<Hunt | null> {
   return rows[0] ? rowToHunt(rows[0]) : null;
 }
 
-export async function startHunt(startingBalance: number, numberOfBonuses: number): Promise<Hunt> {
+export async function startHunt(startingBalance: number, numberOfBonuses: number, casinoElementsUrl?: string): Promise<Hunt> {
   const { rows } = await pool.query(
-    `INSERT INTO hunts (id, starting_balance, number_of_bonuses, ending_balance, status, started_at)
-     VALUES ($1,$2,$3,NULL,'active',$4) RETURNING *`,
-    [Date.now().toString(), startingBalance, numberOfBonuses, Date.now()]
+    `INSERT INTO hunts (id, starting_balance, number_of_bonuses, ending_balance, status, started_at, casino_elements_url)
+     VALUES ($1,$2,$3,NULL,'active',$4,$5) RETURNING *`,
+    [Date.now().toString(), startingBalance, numberOfBonuses, Date.now(), casinoElementsUrl ?? null]
   );
   return rowToHunt(rows[0]);
+}
+
+export async function setCasinoElementsUrl(huntId: string, url: string): Promise<Hunt | null> {
+  const { rows } = await pool.query(
+    "UPDATE hunts SET casino_elements_url=$2 WHERE id=$1 RETURNING *",
+    [huntId, url || null]
+  );
+  return rows[0] ? rowToHunt(rows[0]) : null;
 }
 
 export async function closeEntries(): Promise<Hunt | null> {

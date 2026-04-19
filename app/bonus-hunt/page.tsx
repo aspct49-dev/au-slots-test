@@ -302,6 +302,24 @@ export default function BonusHuntPage() {
             )}
           </AnimatePresence>
         </section>
+
+        {/* Casino Elements embed */}
+        {hunt?.casinoElementsUrl && (
+          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-10">
+            <div className="flex items-center gap-2 mb-4">
+              <Flame size={18} className="text-[#fbbf24]" />
+              <h2 className="text-xl font-black text-white tracking-tight">HUNT TRACKER</h2>
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-white/[0.06]" style={{ height: 600 }}>
+              <iframe
+                src={hunt.casinoElementsUrl}
+                className="w-full h-full"
+                style={{ border: "none", background: "#0a0a0a" }}
+                allowFullScreen
+              />
+            </div>
+          </motion.section>
+        )}
       </div>
     </div>
   );
