@@ -242,6 +242,89 @@ function HowItWorksSection() {
   );
 }
 
+const videos = [
+  {
+    title: "HOW TO DEPOSIT",
+    href: "https://www.youtube.com/watch?v=gbZ1R7Ru3G0",
+    thumbnail: "https://img.youtube.com/vi/gbZ1R7Ru3G0/maxresdefault.jpg",
+  },
+  {
+    title: "HOW TO WITHDRAW",
+    href: "https://www.youtube.com/watch?v=TgdfXKQ5PQw",
+    thumbnail: "https://img.youtube.com/vi/TgdfXKQ5PQw/maxresdefault.jpg",
+  },
+];
+
+function VideoTutorialsSection() {
+  return (
+    <section className="py-14 sm:py-20">
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-10"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4">
+            <span className="text-white/60 text-xs font-bold tracking-widest">• VIDEO TUTORIALS •</span>
+          </div>
+        </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          {videos.map((video, i) => (
+            <motion.a
+              key={video.title}
+              href={video.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="group relative rounded-2xl overflow-hidden border border-white/[0.08] hover:border-[#00ff87]/30 transition-all duration-300"
+            >
+              {/* Thumbnail */}
+              <div className="relative aspect-video bg-[#111111] overflow-hidden">
+                <img
+                  src={video.thumbnail}
+                  alt={video.title}
+                  className="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
+                />
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                {/* Play icon + title */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#00ff87]/20 border border-[#00ff87]/40 flex items-center justify-center group-hover:bg-[#00ff87]/30 transition-colors">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#00ff87">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                    </div>
+                    <span className="text-[#00ff87] font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(0,255,135,0.8)]">
+                      {video.title}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {/* Footer */}
+              <div className="flex items-center justify-between px-4 py-3 bg-[#0d0d0d]">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                  <span className="text-white/40 text-xs font-bold tracking-widest">YOUTUBE</span>
+                </div>
+                <span className="text-white/30 text-xs font-bold tracking-widest group-hover:text-[#00ff87] transition-colors">
+                  WATCH →
+                </span>
+              </div>
+            </motion.a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   access_denied: "You cancelled the Kick login.",
   missing_params: "Login failed: missing parameters from Kick.",
@@ -281,6 +364,7 @@ export default function HomePage() {
       <HowItWorksSection />
       <SponsorsSection />
       <StreamSchedule />
+      <VideoTutorialsSection />
       <SocialLinks />
     </div>
   );

@@ -167,11 +167,12 @@ export default function HeroSection() {
               className="filter drop-shadow-[0_0_20px_rgba(0,255,135,0.5)]"
             >
               <Image
-                src="/images/logo.png"
+                src="/images/auslots_gif.gif"
                 alt="AUSlots Mascot"
                 width={100}
                 height={100}
                 className="rounded-2xl sm:w-[120px] sm:h-[120px]"
+                unoptimized
               />
             </motion.div>
             <div className="absolute inset-0 blur-2xl bg-[#00ff87]/20 rounded-full scale-150 -z-10" />
