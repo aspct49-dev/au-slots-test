@@ -61,17 +61,15 @@ function isPast(dateStr: string) {
   return new Date(dateStr + "T00:00:00") < t;
 }
 
-/* Generate 14 days starting from the Monday of the current week */
+/* Generate 14 days starting from TODAY */
 function generateTwoWeeks(): ScheduleEntry[] {
   const today = new Date();
-  const day = today.getDay(); // 0=Sun
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - ((day + 6) % 7)); // go back to Monday
+  today.setHours(0, 0, 0, 0);
 
   const entries: ScheduleEntry[] = [];
   for (let i = 0; i < 14; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
     entries.push({ date: toDateStr(d), medi: "TBA", layto: "TBA", aus: "TBA" });
   }
   return entries;
@@ -83,7 +81,7 @@ function mergeEntries(skeleton: ScheduleEntry[], api: ScheduleEntry[]): Schedule
   return skeleton.map((s) => map.get(s.date) ?? s);
 }
 
-/* Split into 7-day weeks */
+/* Split into 7-day chunks */
 function splitWeeks(entries: ScheduleEntry[]): ScheduleEntry[][] {
   const weeks: ScheduleEntry[][] = [];
   for (let i = 0; i < entries.length; i += 7) {
