@@ -166,13 +166,11 @@ export default function HeroSection() {
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="filter drop-shadow-[0_0_20px_rgba(0,255,135,0.5)]"
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/images/auslots_gif.gif"
                 alt="AUSlots Mascot"
-                width={100}
-                height={100}
-                className="rounded-2xl sm:w-[120px] sm:h-[120px]"
-                unoptimized
+                className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-2xl"
               />
             </motion.div>
             <div className="absolute inset-0 blur-2xl bg-[#00ff87]/20 rounded-full scale-150 -z-10" />
