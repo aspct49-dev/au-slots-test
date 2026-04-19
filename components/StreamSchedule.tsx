@@ -61,15 +61,18 @@ function isPast(dateStr: string) {
   return new Date(dateStr + "T00:00:00") < t;
 }
 
-/* Generate 14 days starting from TODAY */
-function generateTwoWeeks(): ScheduleEntry[] {
+/* Generate 3 full Mon→Sun weeks starting from the Monday of the current week */
+function generateWeeks(): ScheduleEntry[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const day = today.getDay(); // 0=Sun
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((day + 6) % 7)); // roll back to Monday
 
   const entries: ScheduleEntry[] = [];
-  for (let i = 0; i < 14; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
+  for (let i = 0; i < 21; i++) { // 3 weeks
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
     entries.push({ date: toDateStr(d), medi: "TBA", layto: "TBA", aus: "TBA" });
   }
   return entries;
@@ -81,7 +84,7 @@ function mergeEntries(skeleton: ScheduleEntry[], api: ScheduleEntry[]): Schedule
   return skeleton.map((s) => map.get(s.date) ?? s);
 }
 
-/* Split into 7-day chunks */
+/* Split into 7-day chunks (already Mon-aligned) */
 function splitWeeks(entries: ScheduleEntry[]): ScheduleEntry[][] {
   const weeks: ScheduleEntry[][] = [];
   for (let i = 0; i < entries.length; i += 7) {
@@ -106,8 +109,8 @@ export default function StreamSchedule() {
       .catch(() => {});
   }, []);
 
-  // Build the 2-week grid, fill in API data where available
-  const skeleton = generateTwoWeeks();
+  // Build Mon→Sun weeks, fill in API data where available
+  const skeleton = generateWeeks();
   const merged = mergeEntries(skeleton, apiEntries);
   const weeks = splitWeeks(merged);
   const week = weeks[weekIdx] ?? [];
