@@ -209,9 +209,9 @@ export default function BonusHuntPage() {
 
             ) : (
               /* ── Active / Closed — guessing UI ── */
-              <motion.div key="active" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Hunt info */}
-                <div className="lg:col-span-1 space-y-4">
+              <motion.div key="active" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`grid gap-6 ${hunt.casinoElementsUrl ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-3"}`}>
+                {/* Left: Hunt info + guess form */}
+                <div className={`space-y-4 ${hunt.casinoElementsUrl ? "" : "lg:col-span-3"}`}>
                   <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 space-y-4">
                     <h3 className="text-sm font-black text-white/60 uppercase tracking-widest">Hunt Info</h3>
                     {[
@@ -225,10 +225,7 @@ export default function BonusHuntPage() {
                       </div>
                     ))}
                   </div>
-                </div>
 
-                {/* Guess form */}
-                <div className="lg:col-span-2">
                   <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-6">
                     {hunt.status === "closed" ? (
                       <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
@@ -298,28 +295,23 @@ export default function BonusHuntPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Right: Casino Elements tracker */}
+                {hunt.casinoElementsUrl && (
+                  <div className="rounded-2xl overflow-hidden border border-white/[0.06]" style={{ minHeight: 500 }}>
+                    <iframe
+                      src={hunt.casinoElementsUrl}
+                      className="w-full h-full"
+                      style={{ border: "none", background: "#0a0a0a", minHeight: 500 }}
+                      allowFullScreen
+                    />
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
         </section>
 
-        {/* Casino Elements embed */}
-        {hunt?.casinoElementsUrl && (
-          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-10">
-            <div className="flex items-center gap-2 mb-4">
-              <Flame size={18} className="text-[#fbbf24]" />
-              <h2 className="text-xl font-black text-white tracking-tight">HUNT TRACKER</h2>
-            </div>
-            <div className="rounded-2xl overflow-hidden border border-white/[0.06]" style={{ height: 600 }}>
-              <iframe
-                src={hunt.casinoElementsUrl}
-                className="w-full h-full"
-                style={{ border: "none", background: "#0a0a0a" }}
-                allowFullScreen
-              />
-            </div>
-          </motion.section>
-        )}
       </div>
     </div>
   );
