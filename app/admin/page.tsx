@@ -13,6 +13,7 @@ import {
   Settings,
   ArrowRight,
   Activity,
+  Lock,
 } from "lucide-react";
 import { reviews } from "@/lib/reviewsData";
 
@@ -79,6 +80,7 @@ const quickActions = [
   { label: "Add Slot Review",    href: "/admin/reviews",    icon: Star },
   { label: "Create Raffle",      href: "/admin/raffles",    icon: Ticket },
   { label: "New Giveaway",       href: "/admin/giveaways",  icon: Gift },
+  { label: "Vault",              href: "/admin/vault",      icon: Lock },
   { label: "New Tournament",     href: "/admin/tournament", icon: Swords },
   { label: "Update Schedule",    href: "/admin/schedule",   icon: Calendar },
 ];
