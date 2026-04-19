@@ -170,7 +170,7 @@ export default function HeroSection() {
               <img
                 src="/images/auslots_gif.gif"
                 alt="AUSlots Mascot"
-                className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-2xl"
+                className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-2xl"
               />
             </motion.div>
             <div className="absolute inset-0 blur-2xl bg-[#00ff87]/20 rounded-full scale-150 -z-10" />
