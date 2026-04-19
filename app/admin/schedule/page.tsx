@@ -79,8 +79,9 @@ export default function AdminSchedule() {
         setMsg("Saved!");
         setTimeout(() => setMsg(""), 2500);
       } else {
-        setMsg("Error saving — check console");
-        setTimeout(() => setMsg(""), 3000);
+        const body = await res.json().catch(() => ({}));
+        setMsg(`Error ${res.status}: ${body.error || "Unknown error"}`);
+        setTimeout(() => setMsg(""), 5000);
       }
     } finally {
       setSaving(false);
