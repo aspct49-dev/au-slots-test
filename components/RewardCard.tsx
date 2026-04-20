@@ -208,13 +208,13 @@ export default function RewardCard({
                 <>
                   <div className="bg-[#1a1a1a] border border-white/[0.06] rounded-xl px-4 py-3 mb-5">
                     <p className="text-white/50 text-xs leading-relaxed">
-                      Fill in your account details. ViperSpin or Zesty.Bet is required, plus your Discord username.
+                      Fill in your account details. Viperspin or Zesty.Bet is required, plus your Discord username.
                     </p>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <label className={labelCls}>ViperSpin Email <span className="text-white/25 font-normal normal-case tracking-normal">(if applicable)</span></label>
+                      <label className={labelCls}>Viperspin Email <span className="text-white/25 font-normal normal-case tracking-normal">(if applicable)</span></label>
                       <input
                         className={inputCls}
                         type="email"
@@ -281,7 +281,7 @@ export default function RewardCard({
           className="absolute top-3 right-3 z-20 px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider whitespace-nowrap shadow-lg border border-black/20"
           style={{
             backgroundColor: providerColor,
-            color: provider === "ViperSpin" ? "#ffffff" : "#000000",
+            color: provider === "Viperspin" ? "#ffffff" : "#000000",
           }}
         >
           {provider === "Pragmatic Play" ? "PRAGMATIC"
@@ -324,7 +324,7 @@ export default function RewardCard({
         <div className="mb-4">
           <h3 className="text-white font-bold text-base leading-tight mb-1">{gameName}</h3>
           {provider !== "AUSlots" && (
-            <p className="text-xs font-medium" style={{ color: provider === "Zesty.Bet" ? "#4ade80" : provider === "ViperSpin" ? "#06b6d4" : "rgba(255,255,255,0.4)" }}>
+            <p className="text-xs font-medium" style={{ color: provider === "Zesty.Bet" ? "#4ade80" : provider === "Viperspin" ? "#06b6d4" : "rgba(255,255,255,0.4)" }}>
               {provider}
             </p>
           )}

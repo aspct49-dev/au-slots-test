@@ -2,7 +2,7 @@
   {
     "id": "1",
     "gameName": "Crazy Ex Girlfriend",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 50,
     "pointCost": 3000,
     "inventory": 98,
@@ -14,7 +14,7 @@
   {
     "id": "2",
     "gameName": "Chaos Crew 3",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 50,
     "pointCost": 3000,
     "inventory": 100,
@@ -26,7 +26,7 @@
   {
     "id": "3",
     "gameName": "Sweet Bonanza 1000",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 50,
     "pointCost": 3000,
     "inventory": 99,
@@ -38,7 +38,7 @@
   {
     "id": "4",
     "gameName": "Starlight Princess 1000",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 50,
     "pointCost": 3000,
     "inventory": 100,
@@ -50,7 +50,7 @@
   {
     "id": "5",
     "gameName": "Gates of Olympus 1000",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 50,
     "pointCost": 3000,
     "inventory": 100,
@@ -62,7 +62,7 @@
   {
     "id": "6",
     "gameName": "Crazy Ex Girlfriend",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 100,
     "pointCost": 3875,
     "inventory": 97,
@@ -74,7 +74,7 @@
   {
     "id": "7",
     "gameName": "Chaos Crew 3",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 100,
     "pointCost": 3875,
     "inventory": 99,
@@ -86,7 +86,7 @@
   {
     "id": "8",
     "gameName": "Sweet Bonanza 1000",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 100,
     "pointCost": 3875,
     "inventory": 100,
@@ -98,7 +98,7 @@
   {
     "id": "9",
     "gameName": "Starlight Princess 1000",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 100,
     "pointCost": 3875,
     "inventory": 96,
@@ -110,7 +110,7 @@
   {
     "id": "10",
     "gameName": "Gates of Olympus 1000",
-    "provider": "ViperSpin",
+    "provider": "Viperspin",
     "spinCount": 100,
     "pointCost": 3875,
     "inventory": 97,

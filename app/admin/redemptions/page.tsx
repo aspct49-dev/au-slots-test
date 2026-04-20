@@ -212,7 +212,7 @@ export default function AdminRedemptions() {
                   <div className="px-4 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-3 gap-2 border-t border-white/[0.04] mt-1">
                     <div className="flex items-center gap-1.5">
                       <Mail size={11} className="text-[#06b6d4]/60 flex-shrink-0" />
-                      <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider">ViperSpin:</span>
+                      <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider">Viperspin:</span>
                       <span className="text-xs text-white/55 truncate">{r.viperSpinEmail || "—"}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
