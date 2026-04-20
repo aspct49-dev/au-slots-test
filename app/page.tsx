@@ -289,10 +289,10 @@ function VideoTutorialsSection() {
                 <img
                   src={video.thumbnail}
                   alt={video.title}
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
+                  className="w-full h-full object-cover opacity-40 blur-sm group-hover:opacity-55 group-hover:scale-105 transition-all duration-500"
                 />
                 {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
                 {/* Play icon + title */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex items-center gap-3">
