@@ -330,6 +330,9 @@ export default function RewardCard({
           </div>
         </div>
 
+        {/* Requirement note */}
+        <p className="text-white/30 text-xs mb-4">Must be active on the casino to redeem this item.</p>
+
         {/* Price & redeem */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
