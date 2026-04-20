@@ -102,12 +102,12 @@ export default function Footer() {
 
         <div className="mt-12 pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-white/30 text-xs">
-            &copy; 2024 AUSlotsRewards.com — All rights reserved.
+            &copy; 2026 theausofficial.com — All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <span className="text-white/20 text-xs cursor-pointer hover:text-white/50 transition-colors">
+            <Link href="/privacy" className="text-white/20 text-xs hover:text-white/50 transition-colors">
               Privacy Policy
-            </span>
+            </Link>
             <span className="text-white/20 text-xs cursor-pointer hover:text-white/50 transition-colors">
               Terms of Service
             </span>
