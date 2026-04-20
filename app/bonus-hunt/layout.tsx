@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Bonus Hunt",
   description: "Follow AUSlots bonus hunts live. Guess the final balance to win prizes and earn extra points. Updated in real time during streams.",
-  alternates: { canonical: "https://auslotsrewards.com/bonus-hunt" },
+  alternates: { canonical: "https://theausofficial.com/bonus-hunt" },
   openGraph: {
-    title: "Bonus Hunt | AUSlotsRewards",
+    title: "Bonus Hunt | TheAusOfficial",
     description: "Follow AUSlots bonus hunts live. Guess the final balance to win prizes.",
-    url: "https://auslotsrewards.com/bonus-hunt",
+    url: "https://theausofficial.com/bonus-hunt",
   },
 };
 

@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Points Shop",
   description: "Spend your AUSlots points on free spins, casino credits, and prizes. Redeem rewards from ViperSpin, Zesty.Bet, and more.",
-  alternates: { canonical: "https://auslotsrewards.com/points-shop" },
+  alternates: { canonical: "https://theausofficial.com/points-shop" },
   openGraph: {
-    title: "Points Shop | AUSlotsRewards",
+    title: "Points Shop | TheAusOfficial",
     description: "Spend your AUSlots points on free spins, casino credits, and prizes.",
-    url: "https://auslotsrewards.com/points-shop",
+    url: "https://theausofficial.com/points-shop",
   },
 };
 

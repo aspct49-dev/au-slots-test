@@ -119,7 +119,7 @@ export default function Footer() {
 
         <div className="mt-6 p-4 rounded-xl bg-[#111111] border border-white/5">
           <p className="text-white/25 text-xs text-center leading-relaxed">
-            AUSlotsRewards.com is a community rewards platform. Content is intended for entertainment purposes only.
+            theausofficial.com is a community rewards platform. Content is intended for entertainment purposes only.
             Please gamble responsibly. If you have a gambling problem, seek help at{" "}
             <span className="text-[#00ff87]/50">gamblinghelponline.org.au</span>.
             18+ only.

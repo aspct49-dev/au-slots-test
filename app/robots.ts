@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/", "/api/"],
     },
-    sitemap: "https://auslotsrewards.com/sitemap.xml",
+    sitemap: "https://theausofficial.com/sitemap.xml",
   };
 }

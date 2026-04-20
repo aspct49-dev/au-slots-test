@@ -83,7 +83,7 @@ function FeaturesSection() {
             <BubbleText className="text-3xl sm:text-4xl lg:text-5xl tracking-tight text-[#00ff87]/60">{"TO WIN BIG"}</BubbleText>
           </div>
           <p className="text-white/50 text-base max-w-lg mx-auto leading-relaxed">
-            The AUSlotsRewards platform is packed with ways to earn, compete,
+            TheAusOfficial is packed with ways to earn, compete,
             and win. All for free — just tune in.
           </p>
         </motion.div>

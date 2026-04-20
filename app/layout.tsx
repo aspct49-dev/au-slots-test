@@ -7,13 +7,13 @@ import { AuthProvider } from "@/context/AuthContext";
 import Particles from "@/components/Particles";
 import ScrollProgress from "@/components/ScrollProgress";
 
-const BASE_URL = "https://auslotsrewards.com";
+const BASE_URL = "https://theausofficial.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "AUSlotsRewards — Stream. Earn. Win.",
-    template: "%s | AUSlotsRewards",
+    default: "TheAusOfficial — Stream. Earn. Win.",
+    template: "%s | TheAusOfficial",
   },
   description:
     "Australia's #1 streaming rewards community. Earn points watching AUSlots live on Kick, enter raffles, and win prizes.",
@@ -30,17 +30,17 @@ export const metadata: Metadata = {
     apple: "/images/logo.png",
   },
   openGraph: {
-    title: "AUSlotsRewards — Stream. Earn. Win.",
+    title: "TheAusOfficial — Stream. Earn. Win.",
     description: "Australia's #1 streaming rewards community. Earn points watching AUSlots live on Kick, enter raffles, and win prizes.",
     type: "website",
     url: BASE_URL,
-    siteName: "AUSlotsRewards",
-    images: [{ url: "/images/logo.png", width: 512, height: 512, alt: "AUSlotsRewards" }],
+    siteName: "TheAusOfficial",
+    images: [{ url: "/images/logo.png", width: 512, height: 512, alt: "TheAusOfficial" }],
     locale: "en_AU",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AUSlotsRewards — Stream. Earn. Win.",
+    title: "TheAusOfficial — Stream. Earn. Win.",
     description: "Australia's #1 streaming rewards community.",
     images: ["/images/logo.png"],
   },

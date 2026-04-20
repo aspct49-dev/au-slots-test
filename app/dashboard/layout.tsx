@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "My Dashboard",
-  description: "View your redemption history, reward status, and points activity on AUSlotsRewards.",
+  description: "View your redemption history, reward status, and points activity on TheAusOfficial.",
   robots: { index: false, follow: false },
 };
 

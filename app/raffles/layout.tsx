@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Raffles",
   description: "Enter AUSlots raffles using your stream points. Win cash prizes, free spins, and exclusive rewards. New raffles added regularly.",
-  alternates: { canonical: "https://auslotsrewards.com/raffles" },
+  alternates: { canonical: "https://theausofficial.com/raffles" },
   openGraph: {
-    title: "Raffles | AUSlotsRewards",
+    title: "Raffles | TheAusOfficial",
     description: "Enter AUSlots raffles using your stream points. Win cash prizes, free spins, and exclusive rewards.",
-    url: "https://auslotsrewards.com/raffles",
+    url: "https://theausofficial.com/raffles",
   },
 };
 
