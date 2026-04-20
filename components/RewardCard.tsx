@@ -264,15 +264,16 @@ export default function RewardCard({
         </div>
         {provider !== "AUSlots" && (
           <div
-            className="absolute top-3 right-3 px-2 py-1 rounded-lg text-[10px] font-black tracking-wider max-w-[90px] truncate"
+            className="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider whitespace-nowrap border border-black/20 shadow-lg"
             style={{
               backgroundColor: providerColor,
               color: provider === "ViperSpin" ? "#ffffff" : "#000000",
             }}
           >
             {provider === "Pragmatic Play" ? "PRAGMATIC"
-              : provider === "Nolimit City" ? "NOLIMIT"
-              : provider === "PenguinGaming" ? "PENGUIN"
+              : provider === "Nolimit City" ? "NOLIMIT CITY"
+              : provider === "PenguinGaming" ? "PENGUINGAMING"
+              : provider === "Hacksaw" ? "HACKSAW"
               : provider.toUpperCase()}
           </div>
         )}
