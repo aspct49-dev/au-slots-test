@@ -111,9 +111,9 @@ export default function Footer() {
             <Link href="/terms" className="text-white/20 text-xs hover:text-white/50 transition-colors">
               Terms of Service
             </Link>
-            <span className="text-white/20 text-xs cursor-pointer hover:text-white/50 transition-colors">
+            <a href="https://responsiblegambling.org/" target="_blank" rel="noopener noreferrer" className="text-white/20 text-xs hover:text-white/50 transition-colors">
               Responsible Gaming
-            </span>
+            </a>
           </div>
         </div>
 
