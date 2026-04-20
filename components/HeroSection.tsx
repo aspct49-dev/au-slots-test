@@ -201,7 +201,7 @@ export default function HeroSection() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-base sm:text-xl text-white/60 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2 sm:px-0"
         >
-          A VIP experience through personalized rewards, leaderboard, raffles &amp; more!
+          A VIP experience through personalized rewards, bonus hunts, raffles &amp; more!
           <br className="hidden sm:block" />
           Earn rewards from just tuning into our stream.
         </motion.p>
