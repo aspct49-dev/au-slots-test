@@ -108,9 +108,9 @@ export default function Footer() {
             <Link href="/privacy" className="text-white/20 text-xs hover:text-white/50 transition-colors">
               Privacy Policy
             </Link>
-            <span className="text-white/20 text-xs cursor-pointer hover:text-white/50 transition-colors">
+            <Link href="/terms" className="text-white/20 text-xs hover:text-white/50 transition-colors">
               Terms of Service
-            </span>
+            </Link>
             <span className="text-white/20 text-xs cursor-pointer hover:text-white/50 transition-colors">
               Responsible Gaming
             </span>
