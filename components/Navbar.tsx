@@ -62,9 +62,28 @@ const socialLinks = [
   },
 ];
 
+const helpLinks = [
+  {
+    name: "How to Deposit",
+    href: "https://www.youtube.com/watch?v=gbZ1R7Ru3G0",
+    icon: "💰",
+  },
+  {
+    name: "How to Withdraw",
+    href: "https://www.youtube.com/watch?v=TgdfXKQ5PQw",
+    icon: "🏦",
+  },
+  {
+    name: "NordVPN: Access certain websites",
+    href: "https://nordvpn.com/?srsltid=AfmBOorQ9Bu1OI60eC6bnj0-U9_LPTYWtsOrvYdaA-q484Xkm0flDeIM",
+    icon: "🔒",
+  },
+];
+
 const navLinks = [
   { name: "HOME", href: "/" },
-  { name: "SOCIALS", href: "#", dropdown: true },
+  { name: "SOCIALS", href: "#", dropdown: "socials" },
+  { name: "HELP", href: "#", dropdown: "help" },
   { name: "REVIEWS", href: "/reviews" },
   { name: "STORE", href: "/points-shop" },
   { name: "HUNTS", href: "/bonus-hunt" },
@@ -82,9 +101,11 @@ export default function Navbar() {
   const [isStreamer, setIsStreamer] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [socialsOpen, setSocialsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isLive, setIsLive] = useState(false);
   const socialsRef = useRef<HTMLDivElement>(null);
+  const helpRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const KICK_CHANNEL = process.env.NEXT_PUBLIC_KICK_CHANNEL ?? "auslots";
@@ -121,6 +142,9 @@ export default function Navbar() {
       if (socialsRef.current && !socialsRef.current.contains(e.target as Node)) {
         setSocialsOpen(false);
       }
+      if (helpRef.current && !helpRef.current.contains(e.target as Node)) {
+        setHelpOpen(false);
+      }
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
@@ -155,10 +179,10 @@ export default function Navbar() {
             {/* Center nav - desktop */}
             <div className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) =>
-                link.dropdown ? (
+                link.dropdown === "socials" ? (
                   <div key={link.name} ref={socialsRef} className="relative">
                     <button
-                      onClick={() => setSocialsOpen(!socialsOpen)}
+                      onClick={() => { setSocialsOpen(!socialsOpen); setHelpOpen(false); }}
                       className={`flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold tracking-widest transition-all duration-200 ${
                         socialsOpen
                           ? "text-[#00ff87] bg-[#00ff87]/10"
@@ -166,12 +190,8 @@ export default function Navbar() {
                       }`}
                     >
                       {link.name}
-                      <ChevronDown
-                        size={12}
-                        className={`transition-transform duration-200 ${socialsOpen ? "rotate-180" : ""}`}
-                      />
+                      <ChevronDown size={12} className={`transition-transform duration-200 ${socialsOpen ? "rotate-180" : ""}`} />
                     </button>
-
                     <AnimatePresence>
                       {socialsOpen && (
                         <motion.div
@@ -195,6 +215,47 @@ export default function Navbar() {
                               </span>
                               <span className="text-sm font-medium text-white/70 group-hover/social:text-white transition-colors">
                                 {social.name}
+                              </span>
+                            </a>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : link.dropdown === "help" ? (
+                  <div key={link.name} ref={helpRef} className="relative">
+                    <button
+                      onClick={() => { setHelpOpen(!helpOpen); setSocialsOpen(false); }}
+                      className={`flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold tracking-widest transition-all duration-200 ${
+                        helpOpen
+                          ? "text-[#00ff87] bg-[#00ff87]/10"
+                          : "text-white/60 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      {link.name}
+                      <ChevronDown size={12} className={`transition-transform duration-200 ${helpOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    <AnimatePresence>
+                      {helpOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-[#111111] border border-white/10 rounded-xl overflow-hidden shadow-2xl"
+                        >
+                          {helpLinks.map((item) => (
+                            <a
+                              key={item.name}
+                              href={item.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => setHelpOpen(false)}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors group/help"
+                            >
+                              <span className="text-base">{item.icon}</span>
+                              <span className="text-sm font-medium text-white/70 group-hover/help:text-white transition-colors">
+                                {item.name}
                               </span>
                             </a>
                           ))}
@@ -359,38 +420,44 @@ export default function Navbar() {
           >
             <div className="px-4 py-4 space-y-1">
               {navLinks.map((link) =>
-                link.dropdown ? (
+                link.dropdown === "socials" ? (
                   <div key={link.name}>
                     <button
                       onClick={() => setSocialsOpen(!socialsOpen)}
                       className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-bold tracking-wider text-white/60 hover:text-white hover:bg-white/5 transition-all"
                     >
                       {link.name}
-                      <ChevronDown
-                        size={14}
-                        className={`transition-transform ${socialsOpen ? "rotate-180" : ""}`}
-                      />
+                      <ChevronDown size={14} className={`transition-transform ${socialsOpen ? "rotate-180" : ""}`} />
                     </button>
                     <AnimatePresence>
                       {socialsOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden ml-4 mt-1 space-y-1"
-                        >
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden ml-4 mt-1 space-y-1">
                           {socialLinks.map((s) => (
-                            <a
-                              key={s.name}
-                              href={s.href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 transition-colors"
-                            >
+                            <a key={s.name} href={s.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 transition-colors">
                               <span style={{ color: s.color }}>{s.icon}</span>
-                              <span className="text-sm text-white/60 hover:text-white transition-colors">
-                                {s.name}
-                              </span>
+                              <span className="text-sm text-white/60 hover:text-white transition-colors">{s.name}</span>
+                            </a>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : link.dropdown === "help" ? (
+                  <div key={link.name}>
+                    <button
+                      onClick={() => setHelpOpen(!helpOpen)}
+                      className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-bold tracking-wider text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      {link.name}
+                      <ChevronDown size={14} className={`transition-transform ${helpOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    <AnimatePresence>
+                      {helpOpen && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden ml-4 mt-1 space-y-1">
+                          {helpLinks.map((item) => (
+                            <a key={item.name} href={item.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 transition-colors">
+                              <span className="text-base">{item.icon}</span>
+                              <span className="text-sm text-white/60 hover:text-white transition-colors">{item.name}</span>
                             </a>
                           ))}
                         </motion.div>
