@@ -3,9 +3,17 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Zap } from "lucide-react";
 import { BubbleText } from "@/components/ui/bubble-text";
+
+interface Stat { value: string; label: string; }
+const DEFAULT_STATS: Stat[] = [
+  { value: "10K+",  label: "Community Members" },
+  { value: "$50K+", label: "Rewards Given Away" },
+  { value: "500+",  label: "Raffle Winners" },
+  { value: "24/7",  label: "Active Community" },
+];
 
 function ParticleCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -103,6 +111,15 @@ function ParticleCanvas() {
 }
 
 export default function HeroSection() {
+  const [stats, setStats] = useState<Stat[]>(DEFAULT_STATS);
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (Array.isArray(data) && data.length) setStats(data); })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
       {/* Animated gradient bg */}
@@ -220,12 +237,7 @@ export default function HeroSection() {
           transition={{ duration: 0.6, delay: 0.7 }}
           className="mt-12 sm:mt-20 grid grid-cols-2 md:grid-cols-4 rounded-2xl overflow-hidden"
         >
-          {[
-            { value: "10K+", label: "Community Members" },
-            { value: "$50K+", label: "Rewards Given Away" },
-            { value: "500+", label: "Raffle Winners" },
-            { value: "24/7", label: "Active Community" },
-          ].map((stat) => (
+          {stats.map((stat) => (
             <div
               key={stat.label}
               className="bg-[#0a0a0a] px-4 sm:px-6 py-4 sm:py-6 text-center hover:bg-[#111111] transition-colors"

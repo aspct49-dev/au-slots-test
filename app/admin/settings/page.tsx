@@ -2,7 +2,88 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Settings, Save, Radio, Tv2, Plus, X, Loader2, UserCheck } from "lucide-react";
+import { Settings, Save, Radio, Tv2, Plus, X, Loader2, UserCheck, BarChart2 } from "lucide-react";
+
+interface Stat { value: string; label: string; }
+
+function StatsEditor() {
+  const [stats, setStats] = useState<Stat[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/stats")
+      .then(r => r.json())
+      .then(setStats)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const update = (i: number, field: keyof Stat, val: string) => {
+    setStats(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: val } : s));
+    setSaved(false);
+  };
+
+  const save = async () => {
+    setSaving(true); setError(null);
+    const res = await fetch("/api/admin/stats", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(stats),
+    });
+    const data = await res.json();
+    if (!res.ok) setError(data.error ?? "Failed to save");
+    else { setSaved(true); setTimeout(() => setSaved(false), 2500); }
+    setSaving(false);
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+      className="lg:col-span-2 bg-[#111111] border border-white/[0.06] rounded-2xl p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart2 size={15} className="text-[#00ff87]" />
+          <h2 className="text-xs font-black text-white/50 uppercase tracking-widest">Hero Stats</h2>
+        </div>
+        <button
+          onClick={save}
+          disabled={saving || loading}
+          className={`flex items-center gap-1.5 px-3 py-1.5 font-bold text-xs rounded-lg transition-all ${saved ? "bg-[#00ff87]/20 text-[#00ff87] border border-[#00ff87]/30" : "bg-[#00ff87]/10 hover:bg-[#00ff87]/20 text-[#00ff87] border border-[#00ff87]/20"} disabled:opacity-50`}
+        >
+          {saving ? <Loader2 size={11} className="animate-spin" /> : <Save size={11} />}
+          {saved ? "Saved!" : "Save"}
+        </button>
+      </div>
+      <p className="text-white/30 text-xs leading-relaxed">Edit the four stats shown on the homepage hero section.</p>
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {loading ? (
+        <div className="flex items-center gap-2 text-white/20 text-xs"><Loader2 size={12} className="animate-spin" /> Loading...</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {stats.map((stat, i) => (
+            <div key={i} className="flex gap-2 items-center px-3 py-2 rounded-xl bg-[#1a1a1a] border border-white/[0.06]">
+              <input
+                value={stat.value}
+                onChange={e => update(i, "value", e.target.value)}
+                placeholder="Value"
+                className="w-20 bg-transparent text-[#00ff87] font-black text-sm focus:outline-none placeholder:text-white/20"
+              />
+              <span className="text-white/10">|</span>
+              <input
+                value={stat.label}
+                onChange={e => update(i, "label", e.target.value)}
+                placeholder="Label"
+                className="flex-1 bg-transparent text-white/60 text-sm focus:outline-none placeholder:text-white/20"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+}
 
 interface SiteSettings {
   siteName: string;
@@ -204,6 +285,9 @@ export default function AdminSettings() {
           <h2 className="text-xs font-black text-white/50 uppercase tracking-widest mb-4">Responsible Gambling Note</h2>
           <textarea rows={2} className={`${inputCls} resize-none`} value={settings.responsibleGamblingNote} onChange={e => set("responsibleGamblingNote", e.target.value)} />
         </motion.div>
+
+        {/* Hero stats */}
+        <StatsEditor />
 
         {/* Streamer role management */}
         <StreamerManager />
