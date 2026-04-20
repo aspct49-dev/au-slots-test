@@ -111,6 +111,7 @@ export default function RewardCard({
 
   const closeModal = () => {
     setRedeemState("idle");
+    setFeedbackMsg("");
     setInfoSubmitted(false);
     setRedemptionId(null);
     setCancelling(false);
