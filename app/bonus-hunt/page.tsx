@@ -209,83 +209,80 @@ export default function BonusHuntPage() {
 
             ) : (
               /* ── Active / Closed — guessing UI ── */
-              <motion.div key="active" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`grid gap-6 ${hunt.casinoElementsUrl ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-3"}`}>
-                {/* Left: Hunt info + guess form */}
-                <div className={`space-y-4 ${hunt.casinoElementsUrl ? "" : "lg:col-span-3"}`}>
-                  <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 space-y-4">
-                    <h3 className="text-sm font-black text-white/60 uppercase tracking-widest">Hunt Info</h3>
-                    {[
-                      { icon: <DollarSign size={14} className="text-[#fbbf24]" />, label: "Starting Balance", value: `$${hunt.startingBalance.toLocaleString()}` },
-                      { icon: <Hash size={14} className="text-[#60a5fa]" />, label: "Bonuses", value: hunt.numberOfBonuses },
-                      { icon: <Users size={14} className="text-[#00ff87]" />, label: "Guesses So Far", value: data.totalGuesses },
-                    ].map(r => (
-                      <div key={r.label} className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
-                        <div className="flex items-center gap-2 text-white/50 text-sm">{r.icon}{r.label}</div>
-                        <span className="font-black text-white text-sm">{r.value}</span>
-                      </div>
-                    ))}
-                  </div>
+              <motion.div key="active" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
 
-                  <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-6">
+                {/* Stats bar */}
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { icon: <DollarSign size={13} className="text-[#fbbf24]" />, label: "Starting", value: `$${hunt.startingBalance.toLocaleString()}`, color: "#fbbf24" },
+                    { icon: <Hash size={13} className="text-[#60a5fa]" />, label: "Bonuses", value: hunt.numberOfBonuses, color: "#60a5fa" },
+                    { icon: <Users size={13} className="text-[#00ff87]" />, label: "Guesses", value: data.totalGuesses, color: "#00ff87" },
+                  ].map(r => (
+                    <div key={r.label} className="bg-[#111111] border border-white/[0.06] rounded-xl p-3 sm:p-4 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">{r.icon}</div>
+                      <p className="text-base sm:text-xl font-black" style={{ color: r.color }}>{r.value}</p>
+                      <p className="text-white/40 text-[10px] sm:text-xs mt-0.5">{r.label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Main content: guess form + tracker */}
+                <div className={`grid gap-4 ${hunt.casinoElementsUrl ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
+
+                  {/* Guess form */}
+                  <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 sm:p-6">
                     {hunt.status === "closed" ? (
-                      <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
-                        <Lock size={32} className="text-yellow-400/60" />
-                        <p className="text-yellow-400 font-black text-lg">Entries Are Closed</p>
+                      <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center gap-3">
+                        <Lock size={28} className="text-yellow-400/60" />
+                        <p className="text-yellow-400 font-black text-base sm:text-lg">Entries Are Closed</p>
                         <p className="text-white/40 text-sm max-w-xs">No more guesses can be submitted. Watch the hunt live to see who wins!</p>
                         {data?.myGuess && (
-                          <p className="text-white/60 text-sm mt-2">
-                            Your guess: <span className="text-white font-bold">${data.myGuess.guess.toLocaleString()}</span>
-                          </p>
+                          <p className="text-white/60 text-sm">Your guess: <span className="text-white font-bold">${data.myGuess.guess.toLocaleString()}</span></p>
                         )}
-                        <a href="https://kick.com/auslots" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-sm rounded-xl transition-all">
+                        <a href="https://kick.com/auslots" target="_blank" rel="noopener noreferrer"
+                          className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-sm rounded-xl transition-all">
                           WATCH LIVE
                         </a>
                       </div>
                     ) : (
-                      <div className="space-y-5">
+                      <div className="space-y-4">
                         <div>
                           <h3 className="text-base font-black text-white mb-1">
                             {data?.myGuess ? "Update Your Guess" : "Submit Your Guess"}
                           </h3>
                           <p className="text-white/40 text-sm">What do you think the ending balance will be?</p>
                         </div>
-
                         {data?.myGuess && (
                           <div className="flex items-center gap-2 text-[#00ff87] text-sm font-semibold bg-[#00ff87]/5 border border-[#00ff87]/20 rounded-xl px-4 py-2.5">
                             <CheckCircle size={14} />
-                            Current guess: ${data.myGuess.guess.toLocaleString()} — you can change it below
+                            Current: ${data.myGuess.guess.toLocaleString()} — update below
                           </div>
                         )}
-
-                        <div className="flex gap-3">
+                        <div className="flex gap-2 sm:gap-3">
                           <div className="relative flex-1">
                             <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
                             <input
-                              type="number"
-                              min={1}
+                              type="number" min={1}
                               value={guessInput}
                               onChange={e => setGuessInput(e.target.value)}
                               onKeyDown={e => e.key === "Enter" && submitGuess()}
                               placeholder="e.g. 3500"
-                              className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl pl-9 pr-3 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-[#fbbf24]/40 transition-colors"
+                              className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl pl-9 pr-3 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-[#fbbf24]/40 transition-colors text-sm"
                             />
                           </div>
                           <button
                             onClick={submitGuess}
                             disabled={submitting || !guessInput}
-                            className="flex items-center gap-2 px-6 py-3 bg-[#fbbf24] hover:bg-[#f59e0b] disabled:opacity-50 text-black font-black text-sm rounded-xl transition-all"
+                            className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-[#fbbf24] hover:bg-[#f59e0b] disabled:opacity-50 text-black font-black text-xs sm:text-sm rounded-xl transition-all whitespace-nowrap"
                           >
                             {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
-                            {!isLoggedIn ? "LOG IN TO GUESS" : data?.myGuess ? "UPDATE" : "SUBMIT"}
+                            {!isLoggedIn ? "LOG IN" : data?.myGuess ? "UPDATE" : "SUBMIT"}
                           </button>
                         </div>
-
                         <AnimatePresence>
                           {submitMsg && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                              className={`flex items-center gap-2 text-sm font-semibold ${submitMsg.type === "success" ? "text-[#00ff87]" : "text-red-400"}`}
-                            >
+                            <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                              className={`flex items-center gap-2 text-sm font-semibold ${submitMsg.type === "success" ? "text-[#00ff87]" : "text-red-400"}`}>
                               {submitMsg.type === "success" ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
                               {submitMsg.text}
                             </motion.div>
@@ -294,19 +291,34 @@ export default function BonusHuntPage() {
                       </div>
                     )}
                   </div>
-                </div>
 
-                {/* Right: Casino Elements tracker */}
-                {hunt.casinoElementsUrl && (
-                  <div className="rounded-2xl overflow-hidden border border-white/[0.06]" style={{ minHeight: 500 }}>
-                    <iframe
-                      src={hunt.casinoElementsUrl}
-                      className="w-full h-full"
-                      style={{ border: "none", background: "#0a0a0a", minHeight: 500 }}
-                      allowFullScreen
-                    />
-                  </div>
-                )}
+                  {/* Casino Elements tracker */}
+                  {hunt.casinoElementsUrl && (
+                    <div className="space-y-3">
+                      {/* Mobile: link button */}
+                      <div className="block lg:hidden">
+                        <a
+                          href={hunt.casinoElementsMobileUrl || hunt.casinoElementsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#fbbf24]/10 border border-[#fbbf24]/20 text-[#fbbf24] font-black text-sm hover:bg-[#fbbf24]/20 transition-all"
+                        >
+                          <TrendingUp size={16} />
+                          VIEW BONUS HUNT TRACKER
+                        </a>
+                      </div>
+                      {/* Desktop: iframe */}
+                      <div className="hidden lg:block rounded-2xl overflow-hidden border border-white/[0.06]" style={{ minHeight: 500 }}>
+                        <iframe
+                          src={hunt.casinoElementsUrl}
+                          className="w-full h-full"
+                          style={{ border: "none", background: "#0a0a0a", minHeight: 500 }}
+                          allowFullScreen
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

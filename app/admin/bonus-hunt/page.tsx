@@ -32,6 +32,7 @@ export default function AdminBonusHunt() {
   const [numBonuses, setNumBonuses] = useState("");
   const [casinoUrl, setCasinoUrl] = useState("");
   const [liveUrl, setLiveUrl] = useState("");
+  const [liveMobileUrl, setLiveMobileUrl] = useState("");
 
   // End hunt form
   const [endBal, setEndBal] = useState("");
@@ -72,7 +73,7 @@ export default function AdminBonusHunt() {
     const res = await fetch("/api/admin/hunt", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "setUrl", huntId: hunt.id, url: liveUrl }),
+      body: JSON.stringify({ action: "setUrl", huntId: hunt.id, url: liveUrl, mobileUrl: liveMobileUrl || undefined }),
     });
     const data = await res.json();
     if (!res.ok) { setError(data.error); setBusy(false); return; }
@@ -225,17 +226,25 @@ export default function AdminBonusHunt() {
                 )}
 
                 {/* Casino Elements URL */}
-                <div className="pb-4 border-b border-white/[0.06]">
-                  <h2 className="text-sm font-black text-white/60 uppercase tracking-widest mb-3">Casino Elements Tracker</h2>
+                <div className="pb-4 border-b border-white/[0.06] space-y-3">
+                  <h2 className="text-sm font-black text-white/60 uppercase tracking-widest">Casino Elements Tracker</h2>
                   {hunt.casinoElementsUrl && (
-                    <p className="text-white/30 text-xs mb-2 truncate">Current: {hunt.casinoElementsUrl}</p>
+                    <p className="text-white/30 text-xs truncate">PC: {hunt.casinoElementsUrl}</p>
                   )}
-                  <div className="flex gap-2">
-                    <input className={`${inputCls} flex-1`} value={liveUrl} onChange={e => setLiveUrl(e.target.value)} placeholder="https://casinoelements.com/c/auslots/bonushunt/..." />
-                    <button onClick={updateUrl} disabled={busy || !liveUrl} className="px-4 py-2 bg-[#fbbf24]/10 hover:bg-[#fbbf24]/20 border border-[#fbbf24]/20 text-[#fbbf24] font-bold text-sm rounded-xl transition-all disabled:opacity-50 whitespace-nowrap">
-                      {busy ? <Loader2 size={13} className="animate-spin" /> : "Set URL"}
-                    </button>
+                  {hunt.casinoElementsMobileUrl && (
+                    <p className="text-white/30 text-xs truncate">Mobile: {hunt.casinoElementsMobileUrl}</p>
+                  )}
+                  <div>
+                    <label className={labelCls}>PC / Desktop URL</label>
+                    <input className={inputCls} value={liveUrl} onChange={e => setLiveUrl(e.target.value)} placeholder="https://casinoelements.com/..." />
                   </div>
+                  <div>
+                    <label className={labelCls}>Mobile URL</label>
+                    <input className={inputCls} value={liveMobileUrl} onChange={e => setLiveMobileUrl(e.target.value)} placeholder="https://casinoelements.com/... (mobile)" />
+                  </div>
+                  <button onClick={updateUrl} disabled={busy || (!liveUrl && !liveMobileUrl)} className="px-4 py-2 bg-[#fbbf24]/10 hover:bg-[#fbbf24]/20 border border-[#fbbf24]/20 text-[#fbbf24] font-bold text-sm rounded-xl transition-all disabled:opacity-50">
+                    {busy ? <Loader2 size={13} className="animate-spin" /> : "Set URLs"}
+                  </button>
                 </div>
 
                 {/* End hunt */}

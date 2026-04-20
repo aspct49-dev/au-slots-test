@@ -13,6 +13,7 @@ export interface Hunt {
   endedAt?: number;
   winnerGuessId?: string;
   casinoElementsUrl?: string;
+  casinoElementsMobileUrl?: string;
 }
 
 export interface Guess {
@@ -26,16 +27,17 @@ export interface Guess {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function rowToHunt(row: any): Hunt {
   return {
-    id:               row.id,
-    startingBalance:  Number(row.starting_balance),
-    numberOfBonuses:  row.number_of_bonuses,
-    endingBalance:    row.ending_balance != null ? Number(row.ending_balance) : null,
-    status:           row.status,
-    startedAt:        Number(row.started_at),
-    closedAt:         row.closed_at  ? Number(row.closed_at)  : undefined,
-    endedAt:          row.ended_at   ? Number(row.ended_at)   : undefined,
-    winnerGuessId:      row.winner_guess_id ?? undefined,
-    casinoElementsUrl:  row.casino_elements_url ?? undefined,
+    id:                      row.id,
+    startingBalance:         Number(row.starting_balance),
+    numberOfBonuses:         row.number_of_bonuses,
+    endingBalance:           row.ending_balance != null ? Number(row.ending_balance) : null,
+    status:                  row.status,
+    startedAt:               Number(row.started_at),
+    closedAt:                row.closed_at  ? Number(row.closed_at)  : undefined,
+    endedAt:                 row.ended_at   ? Number(row.ended_at)   : undefined,
+    winnerGuessId:           row.winner_guess_id ?? undefined,
+    casinoElementsUrl:       row.casino_elements_url ?? undefined,
+    casinoElementsMobileUrl: row.casino_elements_mobile_url ?? undefined,
   };
 }
 
@@ -68,10 +70,10 @@ export async function startHunt(startingBalance: number, numberOfBonuses: number
   return rowToHunt(rows[0]);
 }
 
-export async function setCasinoElementsUrl(huntId: string, url: string): Promise<Hunt | null> {
+export async function setCasinoElementsUrl(huntId: string, url: string, mobileUrl?: string): Promise<Hunt | null> {
   const { rows } = await pool.query(
-    "UPDATE hunts SET casino_elements_url=$2 WHERE id=$1 RETURNING *",
-    [huntId, url || null]
+    "UPDATE hunts SET casino_elements_url=$2, casino_elements_mobile_url=$3 WHERE id=$1 RETURNING *",
+    [huntId, url || null, mobileUrl ?? null]
   );
   return rows[0] ? rowToHunt(rows[0]) : null;
 }

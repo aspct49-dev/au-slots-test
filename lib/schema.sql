@@ -54,16 +54,18 @@ CREATE TABLE IF NOT EXISTS raffle_tickets (
 );
 
 CREATE TABLE IF NOT EXISTS hunts (
-  id                 TEXT    PRIMARY KEY,
-  starting_balance   NUMERIC NOT NULL,
-  number_of_bonuses  INTEGER NOT NULL,
-  ending_balance     NUMERIC,
-  status             TEXT    NOT NULL DEFAULT 'active',
-  started_at         BIGINT  NOT NULL,
-  closed_at          BIGINT,
-  ended_at           BIGINT,
-  winner_guess_id    TEXT,
-  cleared_at         BIGINT
+  id                          TEXT    PRIMARY KEY,
+  starting_balance            NUMERIC NOT NULL,
+  number_of_bonuses           INTEGER NOT NULL,
+  ending_balance              NUMERIC,
+  status                      TEXT    NOT NULL DEFAULT 'active',
+  started_at                  BIGINT  NOT NULL,
+  closed_at                   BIGINT,
+  ended_at                    BIGINT,
+  winner_guess_id             TEXT,
+  cleared_at                  BIGINT,
+  casino_elements_url         TEXT,
+  casino_elements_mobile_url  TEXT
 );
 
 CREATE TABLE IF NOT EXISTS hunt_guesses (

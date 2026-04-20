@@ -61,7 +61,7 @@ export async function PATCH(req: NextRequest) {
     const denied = await requireAdminOrStreamer();
     if (denied) return denied;
 
-    const { action, endingBalance, url, huntId } = await req.json();
+    const { action, endingBalance, url, mobileUrl, huntId } = await req.json();
 
     if (action === "close") {
       const hunt = await closeEntries();
@@ -83,7 +83,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (action === "setUrl") {
-      const hunt = await setCasinoElementsUrl(huntId, url ?? "");
+      const hunt = await setCasinoElementsUrl(huntId, url ?? "", mobileUrl);
       if (!hunt) return NextResponse.json({ error: "Hunt not found" }, { status: 404 });
       return NextResponse.json(hunt);
     }
