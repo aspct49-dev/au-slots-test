@@ -293,29 +293,22 @@ export default function BonusHuntPage() {
                   </div>
 
                   {/* Casino Elements tracker */}
-                  {hunt.casinoElementsUrl && (
-                    <div className="space-y-3">
-                      {/* Mobile: link button */}
-                      <div className="block lg:hidden">
-                        <a
-                          href={hunt.casinoElementsMobileUrl || hunt.casinoElementsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#fbbf24]/10 border border-[#fbbf24]/20 text-[#fbbf24] font-black text-sm hover:bg-[#fbbf24]/20 transition-all"
-                        >
-                          <TrendingUp size={16} />
-                          VIEW BONUS HUNT TRACKER
-                        </a>
-                      </div>
-                      {/* Desktop: iframe */}
-                      <div className="hidden lg:block rounded-2xl overflow-hidden border border-white/[0.06]" style={{ minHeight: 500 }}>
-                        <iframe
-                          src={hunt.casinoElementsUrl}
-                          className="w-full h-full"
-                          style={{ border: "none", background: "#0a0a0a", minHeight: 500 }}
-                          allowFullScreen
-                        />
-                      </div>
+                  {(hunt.casinoElementsUrl || hunt.casinoElementsMobileUrl) && (
+                    <div className="rounded-2xl overflow-hidden border border-white/[0.06]">
+                      {/* Mobile: use mobile URL if set, else fall back to desktop URL */}
+                      <iframe
+                        src={hunt.casinoElementsMobileUrl || hunt.casinoElementsUrl}
+                        className="w-full block lg:hidden"
+                        style={{ border: "none", background: "#0a0a0a", height: 420 }}
+                        allowFullScreen
+                      />
+                      {/* Desktop: always use desktop URL */}
+                      <iframe
+                        src={hunt.casinoElementsUrl}
+                        className="w-full hidden lg:block"
+                        style={{ border: "none", background: "#0a0a0a", height: 520 }}
+                        allowFullScreen
+                      />
                     </div>
                   )}
                 </div>
