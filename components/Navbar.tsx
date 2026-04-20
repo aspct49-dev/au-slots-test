@@ -16,6 +16,7 @@ import {
   Shield,
   ClipboardList,
   Tv2,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -281,6 +282,10 @@ export default function Navbar() {
 
             {/* Right side */}
             <div className="flex items-center gap-3">
+              {/* Schedule icon */}
+              <Link href="/schedule" className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10 hover:border-[#00ff87]/30 hover:bg-[#00ff87]/10 transition-all duration-200 group">
+                <CalendarDays size={16} className="text-white/40 group-hover:text-[#00ff87] transition-colors" />
+              </Link>
               {/* Live button — always visible, glows when streaming */}
               <a
                 href="https://kick.com/auslots"
