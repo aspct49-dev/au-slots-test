@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Settings, Save, Radio, Tv2, Plus, X, Loader2, UserCheck, BarChart2 } from "lucide-react";
+import { Settings, Save, Radio, Tv2, Plus, X, Loader2, UserCheck, BarChart2, HelpCircle } from "lucide-react";
 
 interface Stat { value: string; label: string; }
 
@@ -220,6 +220,70 @@ function StreamerManager() {
   );
 }
 
+function NordVPNEditor() {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/help")
+      .then(r => r.json())
+      .then(d => setText(d.text ?? ""))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const save = async () => {
+    setSaving(true); setError(null);
+    const res = await fetch("/api/admin/help", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    if (!res.ok) setError(data.error ?? "Failed to save");
+    else { setSaved(true); setTimeout(() => setSaved(false), 2500); }
+    setSaving(false);
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+      className="lg:col-span-2 bg-[#111111] border border-white/[0.06] rounded-2xl p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <HelpCircle size={15} className="text-[#00ff87]" />
+          <h2 className="text-xs font-black text-white/50 uppercase tracking-widest">NordVPN Help Text</h2>
+        </div>
+        <button
+          onClick={save}
+          disabled={saving || loading}
+          className={`flex items-center gap-1.5 px-3 py-1.5 font-bold text-xs rounded-lg transition-all ${saved ? "bg-[#00ff87]/20 text-[#00ff87] border border-[#00ff87]/30" : "bg-[#00ff87]/10 hover:bg-[#00ff87]/20 text-[#00ff87] border border-[#00ff87]/20"} disabled:opacity-50`}
+        >
+          {saving ? <Loader2 size={11} className="animate-spin" /> : <Save size={11} />}
+          {saved ? "Saved!" : "Save"}
+        </button>
+      </div>
+      <p className="text-white/30 text-xs leading-relaxed">
+        This text appears in the <span className="text-white/50 font-semibold">Help &amp; Guides</span> section under &quot;NordVPN: How to access certain websites&quot;.
+      </p>
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {loading ? (
+        <div className="flex items-center gap-2 text-white/20 text-xs"><Loader2 size={12} className="animate-spin" /> Loading...</div>
+      ) : (
+        <textarea
+          rows={6}
+          value={text}
+          onChange={e => { setText(e.target.value); setSaved(false); }}
+          placeholder="Enter NordVPN instructions here..."
+          className={`${inputCls} resize-none`}
+        />
+      )}
+    </motion.div>
+  );
+}
+
 export default function AdminSettings() {
   const [settings, setSettings] = useState<SiteSettings>(defaults);
   const [saved, setSaved] = useState(false);
@@ -288,6 +352,9 @@ export default function AdminSettings() {
 
         {/* Hero stats */}
         <StatsEditor />
+
+        {/* NordVPN help text */}
+        <NordVPNEditor />
 
         {/* Streamer role management */}
         <StreamerManager />

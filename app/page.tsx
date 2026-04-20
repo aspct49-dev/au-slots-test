@@ -14,7 +14,11 @@ import {
   Monitor,
   Wallet,
   Award,
+  ChevronDown,
+  ExternalLink,
+  HelpCircle,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import HeroSection from "@/components/HeroSection";
 import { BubbleText } from "@/components/ui/bubble-text";
 import StreamSchedule from "@/components/StreamSchedule";
@@ -353,6 +357,113 @@ function AuthErrorBanner() {
   );
 }
 
+function HelpSection() {
+  const [open, setOpen] = useState<number | null>(null);
+  const [nordvpnText, setNordvpnText] = useState<string>("");
+
+  useEffect(() => {
+    fetch("/api/help").then(r => r.json()).then(d => setNordvpnText(d.text ?? "")).catch(() => {});
+  }, []);
+
+  const items = [
+    {
+      title: "How to Deposit",
+      icon: "💰",
+      type: "link" as const,
+      href: "https://www.youtube.com/watch?v=gbZ1R7Ru3G0",
+      label: "Watch on YouTube",
+    },
+    {
+      title: "How to Withdraw",
+      icon: "🏦",
+      type: "link" as const,
+      href: "https://www.youtube.com/watch?v=TgdfXKQ5PQw",
+      label: "Watch on YouTube",
+    },
+    {
+      title: "NordVPN: How to access certain websites",
+      icon: "🔒",
+      type: "text" as const,
+      content: nordvpnText,
+    },
+  ];
+
+  return (
+    <section className="py-14 sm:py-20">
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-10"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4">
+            <HelpCircle size={12} className="text-white/60" />
+            <span className="text-white/60 text-xs font-bold tracking-widest">HELP & GUIDES</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black text-white">Need help?</h2>
+          <p className="text-white/40 text-sm mt-2">Everything you need to get started.</p>
+        </motion.div>
+
+        <div className="max-w-2xl mx-auto space-y-3">
+          {items.map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className="rounded-2xl border border-white/[0.08] bg-[#111111] overflow-hidden"
+            >
+              <button
+                onClick={() => setOpen(open === i ? null : i)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="font-bold text-sm text-white/80 group-hover:text-white transition-colors tracking-wide">
+                    {item.title}
+                  </span>
+                </div>
+                <ChevronDown
+                  size={16}
+                  className={`text-white/30 transition-transform duration-300 ${open === i ? "rotate-180 text-[#00ff87]" : ""}`}
+                />
+              </button>
+
+              <motion.div
+                initial={false}
+                animate={{ height: open === i ? "auto" : 0, opacity: open === i ? 1 : 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <div className="px-5 pb-5 pt-1 border-t border-white/[0.06]">
+                  {item.type === "link" ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#00ff87]/10 border border-[#00ff87]/20 text-[#00ff87] text-sm font-bold hover:bg-[#00ff87]/20 transition-all"
+                    >
+                      <ExternalLink size={13} />
+                      {item.label}
+                    </a>
+                  ) : (
+                    <p className="text-white/50 text-sm leading-relaxed whitespace-pre-wrap">
+                      {item.content || "No content added yet. Check back soon!"}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   return (
     <div>
@@ -365,6 +476,7 @@ export default function HomePage() {
       <SponsorsSection />
       <StreamSchedule />
       <VideoTutorialsSection />
+      <HelpSection />
       <SocialLinks />
     </div>
   );
