@@ -49,24 +49,23 @@ export async function POST(req: NextRequest) {
     const allRedemptions = await getRedemptions();
     const userRedemptions = allRedemptions.filter(r => r.username.toLowerCase() === username.toLowerCase());
 
-    const hasPending = userRedemptions.some(r => r.status === "pending");
-    if (hasPending) {
-      return NextResponse.json(
-        { error: "You already have a pending redemption. Please wait for it to be processed." },
-        { status: 429 }
-      );
-    }
-
-    const lastFulfilled = userRedemptions
-      .filter(r => r.status === "fulfilled")
+    // Cooldown applies from the moment of any pending or fulfilled redemption.
+    // Rejected redemptions are excluded so the cooldown is lifted on rejection.
+    const lastActive = userRedemptions
+      .filter(r => r.status === "pending" || r.status === "fulfilled")
       .sort((a, b) => b.redeemedAt - a.redeemedAt)[0];
 
-    if (lastFulfilled) {
-      const msElapsed = Date.now() - lastFulfilled.redeemedAt;
+    if (lastActive) {
+      const msElapsed = Date.now() - lastActive.redeemedAt;
       if (msElapsed < COOLDOWN_MS) {
         const daysLeft = Math.ceil((COOLDOWN_MS - msElapsed) / (24 * 60 * 60 * 1000));
+        const isPending = lastActive.status === "pending";
         return NextResponse.json(
-          { error: `You can redeem again in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}. Items can only be redeemed once every 7 days.` },
+          {
+            error: isPending
+              ? `You have a pending redemption. You can redeem again in ${daysLeft} day${daysLeft !== 1 ? "s" : ""} if it is processed.`
+              : `You can redeem again in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}. Items can only be redeemed once every 7 days.`,
+          },
           { status: 429 }
         );
       }
