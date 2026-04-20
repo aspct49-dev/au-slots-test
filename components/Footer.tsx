@@ -12,7 +12,7 @@ const footerLinks = {
   ],
   Community: [
     { name: "Bonus Hunts", href: "/bonus-hunt" },
-    { name: "Giveaways", href: "/giveaways" },
+    { name: "Vault", href: "/vault" },
     { name: "Schedule", href: "/schedule" },
   ],
   Socials: [
