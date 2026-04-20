@@ -143,8 +143,8 @@ export default function Navbar() {
               <Image
                 src="/images/logo.png"
                 alt="AUSlots"
-                width={72}
-                height={72}
+                width={96}
+                height={96}
                 className="rounded-xl transition-transform group-hover:scale-110"
               />
               <span className="font-black text-lg tracking-widest text-white group-hover:text-[#00ff87] transition-colors">
