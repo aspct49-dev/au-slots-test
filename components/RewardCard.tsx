@@ -241,6 +241,21 @@ export default function RewardCard({
       transition={{ duration: 0.2 }}
       className="group relative bg-[#111111] border border-white/[0.08] rounded-2xl overflow-hidden hover:border-[#00ff87]/25 hover:shadow-[0_0_30px_rgba(0,255,135,0.08)] transition-all duration-300"
     >
+      {/* Provider tag — outside overflow-hidden thumbnail so it never gets clipped */}
+      {provider !== "AUSlots" && (
+        <div
+          className="absolute top-3 right-3 z-20 px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider whitespace-nowrap shadow-lg border border-black/20"
+          style={{
+            backgroundColor: providerColor,
+            color: provider === "ViperSpin" ? "#ffffff" : "#000000",
+          }}
+        >
+          {provider === "Pragmatic Play" ? "PRAGMATIC"
+            : provider === "Nolimit City" ? "NOLIMIT CITY"
+            : provider === "PenguinGaming" ? "PENGUINGAMING"
+            : provider.toUpperCase()}
+        </div>
+      )}
       {/* Game thumbnail */}
       <div
         className="relative h-40 flex items-center justify-center overflow-hidden"
@@ -262,21 +277,6 @@ export default function RewardCard({
             </h3>
           )}
         </div>
-        {provider !== "AUSlots" && (
-          <div
-            className="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider whitespace-nowrap border border-black/20 shadow-lg"
-            style={{
-              backgroundColor: providerColor,
-              color: provider === "ViperSpin" ? "#ffffff" : "#000000",
-            }}
-          >
-            {provider === "Pragmatic Play" ? "PRAGMATIC"
-              : provider === "Nolimit City" ? "NOLIMIT CITY"
-              : provider === "PenguinGaming" ? "PENGUINGAMING"
-              : provider === "Hacksaw" ? "HACKSAW"
-              : provider.toUpperCase()}
-          </div>
-        )}
         {spinCount > 0 && (
           <div className="absolute top-3 left-3 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm border border-white/20 text-white text-[10px] font-black tracking-wider">
             {spinCount} SPINS
