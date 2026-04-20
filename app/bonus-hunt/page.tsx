@@ -296,12 +296,16 @@ export default function BonusHuntPage() {
                   {(hunt.casinoElementsUrl || hunt.casinoElementsMobileUrl) && (
                     <div className="rounded-2xl overflow-hidden border border-white/[0.06]">
                       {/* Mobile: use mobile URL if set, else fall back to desktop URL */}
-                      <iframe
-                        src={hunt.casinoElementsMobileUrl || hunt.casinoElementsUrl}
-                        className="w-full block lg:hidden"
-                        style={{ border: "none", background: "#0a0a0a", height: 420 }}
-                        allowFullScreen
-                      />
+                      {/* Mobile: scale down so more content is visible */}
+                      <div className="block lg:hidden overflow-hidden" style={{ height: 360 }}>
+                        <div style={{ transform: "scale(0.65)", transformOrigin: "top left", width: "154%", height: 554 }}>
+                          <iframe
+                            src={hunt.casinoElementsMobileUrl || hunt.casinoElementsUrl}
+                            style={{ border: "none", background: "#0a0a0a", width: "100%", height: 554 }}
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
                       {/* Desktop: always use desktop URL */}
                       <iframe
                         src={hunt.casinoElementsUrl}
