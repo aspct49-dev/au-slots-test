@@ -535,61 +535,19 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Tab switcher */}
+        {/* My Redemptions */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.05 }}
-          className="flex items-center gap-2 mb-7 p-1 bg-white/[0.03] border border-white/[0.06] rounded-2xl w-fit"
+          transition={{ duration: 0.2 }}
         >
-          {[
-            { key: "mine" as Tab, icon: <User size={13} />, label: "My Redemptions" },
-            { key: "all"  as Tab, icon: <History size={13} />, label: "All Redemptions" },
-          ].map(t => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                tab === t.key
-                  ? "bg-[#00ff87]/10 text-[#00ff87] border border-[#00ff87]/20"
-                  : "text-white/30 hover:text-white/60"
-              }`}
-            >
-              {t.icon}
-              {t.label}
-            </button>
-          ))}
+          <MyRedemptions
+            redemptions={redemptions}
+            loading={loading}
+            onRefresh={loadMine}
+            username={user?.username ?? ""}
+          />
         </motion.div>
-
-        {/* Tab content */}
-        <AnimatePresence mode="wait">
-          {tab === "mine" ? (
-            <motion.div
-              key="mine"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <MyRedemptions
-                redemptions={redemptions}
-                loading={loading}
-                onRefresh={loadMine}
-                username={user?.username ?? ""}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="all"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <AllRedemptions />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );

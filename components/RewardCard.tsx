@@ -172,7 +172,7 @@ export default function RewardCard({
                     <Send size={22} className="text-[#00ff87]" />
                   </div>
                   <p className="text-white font-black text-base mb-1">You&apos;re all set!</p>
-                  <p className="text-[#00ff87] font-semibold text-sm">Your reward will be with you shortly!</p>
+                  <p className="text-[#00ff87] font-semibold text-sm">Your reward will be with you within 24-48 hours!</p>
                   <button
                     onClick={closeModal}
                     className="mt-5 w-full py-2.5 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all"
