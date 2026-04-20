@@ -43,6 +43,12 @@ export default function RewardCard({
   const [infoForm, setInfoForm] = useState({ viperSpinEmail: "", zestyBetInfo: "", discordUsername: "" });
   const [submittingInfo, setSubmittingInfo] = useState(false);
   const [infoSubmitted, setInfoSubmitted] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+
+  const canSubmitInfo = () => {
+    const hasCasino = infoForm.viperSpinEmail.trim() || infoForm.zestyBetInfo.trim();
+    return !!hasCasino && !!infoForm.discordUsername.trim();
+  };
 
   const inventoryPercent = (inventory / maxInventory) * 100;
   const canAfford = isLoggedIn && user ? user.points >= pointCost : false;
@@ -107,6 +113,22 @@ export default function RewardCard({
     setRedeemState("idle");
     setInfoSubmitted(false);
     setRedemptionId(null);
+    setCancelling(false);
+  };
+
+  const handleCancel = async () => {
+    if (!redemptionId) { closeModal(); return; }
+    setCancelling(true);
+    try {
+      const res = await fetch("/api/points/redeem/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ redemptionId }),
+      });
+      const data = await res.json();
+      if (res.ok) setPoints(data.points);
+    } catch { /* silently close */ }
+    closeModal();
   };
 
   const buttonContent = () => {
@@ -185,13 +207,13 @@ export default function RewardCard({
                 <>
                   <div className="bg-[#1a1a1a] border border-white/[0.06] rounded-xl px-4 py-3 mb-5">
                     <p className="text-white/50 text-xs leading-relaxed">
-                      To deliver your reward, please provide your account details below. Fill in only what applies to your item.
+                      Fill in your account details. ViperSpin or Zesty.Bet is required, plus your Discord username.
                     </p>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <label className={labelCls}>ViperSpin Email</label>
+                      <label className={labelCls}>ViperSpin Email <span className="text-white/25 font-normal normal-case tracking-normal">(if applicable)</span></label>
                       <input
                         className={inputCls}
                         type="email"
@@ -201,7 +223,7 @@ export default function RewardCard({
                       />
                     </div>
                     <div>
-                      <label className={labelCls}>Zesty.Bet Email or Username</label>
+                      <label className={labelCls}>Zesty.Bet Email or Username <span className="text-white/25 font-normal normal-case tracking-normal">(if applicable)</span></label>
                       <input
                         className={inputCls}
                         placeholder="email or username"
@@ -210,24 +232,35 @@ export default function RewardCard({
                       />
                     </div>
                     <div>
-                      <label className={labelCls}>Discord Username</label>
+                      <label className={labelCls}>Discord Username <span className="text-red-400">*</span></label>
                       <input
                         className={inputCls}
                         placeholder="username"
                         value={infoForm.discordUsername}
                         onChange={e => setInfoForm(f => ({ ...f, discordUsername: e.target.value }))}
+                        required
                       />
                     </div>
                   </div>
 
                   <button
                     onClick={submitInfo}
-                    disabled={submittingInfo}
-                    className="mt-5 w-full py-2.5 bg-[#00ff87] hover:bg-[#00e676] disabled:opacity-60 text-black font-black text-sm rounded-xl transition-all flex items-center justify-center gap-2"
+                    disabled={submittingInfo || !canSubmitInfo()}
+                    className="mt-5 w-full py-2.5 bg-[#00ff87] hover:bg-[#00e676] disabled:opacity-40 disabled:cursor-not-allowed text-black font-black text-sm rounded-xl transition-all flex items-center justify-center gap-2"
                   >
                     {submittingInfo
                       ? <><Loader2 size={14} className="animate-spin" /> Submitting…</>
                       : <><Send size={14} /> Submit Details</>}
+                  </button>
+
+                  <button
+                    onClick={handleCancel}
+                    disabled={cancelling}
+                    className="mt-2 w-full py-2.5 bg-transparent hover:bg-red-500/10 border border-white/10 hover:border-red-500/30 text-white/40 hover:text-red-400 font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    {cancelling
+                      ? <><Loader2 size={14} className="animate-spin" /> Cancelling…</>
+                      : <><X size={14} /> Cancel Redemption</>}
                   </button>
                 </>
               )}

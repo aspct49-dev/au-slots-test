@@ -21,7 +21,7 @@ export interface Redemption {
   spinCount: number;
   pointCost: number;
   redeemedAt: number;
-  status: "pending" | "fulfilled" | "rejected";
+  status: "pending" | "fulfilled" | "rejected" | "cancelled";
   fulfilledAt?: number;
   rejectedAt?: number;
   rejectionReason?: string;
@@ -152,6 +152,14 @@ export async function rejectRedemption(id: string, reason: string): Promise<Rede
   const { rows } = await pool.query(
     "UPDATE redemptions SET status='rejected', rejected_at=$2, rejection_reason=$3 WHERE id=$1 RETURNING *",
     [id, Date.now(), reason.trim() || "No reason provided"]
+  );
+  return rows[0] ? rowToRedemption(rows[0]) : null;
+}
+
+export async function cancelRedemption(id: string): Promise<Redemption | null> {
+  const { rows } = await pool.query(
+    "UPDATE redemptions SET status='cancelled', rejected_at=$2 WHERE id=$1 AND status='pending' RETURNING *",
+    [id, Date.now()]
   );
   return rows[0] ? rowToRedemption(rows[0]) : null;
 }
