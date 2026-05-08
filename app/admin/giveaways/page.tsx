@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Gift, Play, StopCircle, Shuffle, CheckCircle, MessageSquare, Users, Trash2, Wifi, WifiOff } from "lucide-react";
+import { Gift, Play, StopCircle, Shuffle, CheckCircle, MessageSquare, Users, Trash2, Wifi, WifiOff, X } from "lucide-react";
 
 interface ChatMessage { username: string; message: string; timestamp: number; }
 interface Entry { username: string; enteredAt: number; }
@@ -203,9 +203,15 @@ export default function AdminGiveaways() {
 
   const handleAnimationComplete = () => {
     if (isSpinning) {
-      setWinner(spinWinnerRef.current);
+      const picked = spinWinnerRef.current;
+      setWinner(picked);
       setIsSpinning(false);
+      setEntries(prev => prev.filter(e => e.username.toLowerCase() !== picked.toLowerCase()));
     }
+  };
+
+  const removeEntry = (username: string) => {
+    setEntries(prev => prev.filter(e => e.username.toLowerCase() !== username.toLowerCase()));
   };
 
   useEffect(() => () => { disconnectChat(); }, [disconnectChat]);
@@ -314,10 +320,17 @@ export default function AdminGiveaways() {
                 <p className="text-white/20 text-xs text-center py-4">No entries yet</p>
               ) : (
                 entries.map((e, i) => (
-                  <div key={e.username} className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5">
+                  <div key={e.username} className="group flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5">
                     <Avatar username={e.username} avatarUrl={avatars[e.username.toLowerCase()]} />
                     <span className="text-xs text-white/70 flex-1 truncate">{e.username}</span>
-                    <span className="text-[10px] text-white/30">#{i + 1}</span>
+                    <span className="text-[10px] text-white/30 group-hover:hidden">#{i + 1}</span>
+                    <button
+                      onClick={() => removeEntry(e.username)}
+                      className="hidden group-hover:flex items-center justify-center w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"
+                      title={`Remove ${e.username}`}
+                    >
+                      <X size={11} />
+                    </button>
                   </div>
                 ))
               )}
