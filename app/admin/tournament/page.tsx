@@ -12,18 +12,20 @@ interface Player {
   slot: string;
 }
 
+type WinnerSlot = "p1" | "p2" | null;
+
 interface Match {
   id: string;
   player1: Player;
   player2: Player;
   mult1: string;
   mult2: string;
-  winner: Player | null;
+  winner: WinnerSlot;
   round: number;
   position: number;
 }
 
-const TBD: Player = { name: "TBD", slot: "" };
+const EMPTY_PLAYER: Player = { name: "", slot: "" };
 
 // ── Layout constants ───────────────────────────────────────────────────────────
 const ROW_H    = 56;               // taller row to fit name + slot subtitle
@@ -56,8 +58,8 @@ function buildBracket(players: Player[]): Match[] {
   for (let i = 0; i < size / 2; i++)
     matches.push({
       id: `0-${i}`,
-      player1: players[i*2] ?? TBD,
-      player2: players[i*2+1] ?? TBD,
+      player1: players[i*2] ?? EMPTY_PLAYER,
+      player2: players[i*2+1] ?? EMPTY_PLAYER,
       mult1: "", mult2: "",
       winner: null, round: 0, position: i,
     });
@@ -67,7 +69,7 @@ function buildBracket(players: Player[]): Match[] {
     for (let i = 0; i < count; i++)
       matches.push({
         id: `${r}-${i}`,
-        player1: TBD, player2: TBD,
+        player1: { ...EMPTY_PLAYER }, player2: { ...EMPTY_PLAYER },
         mult1: "", mult2: "",
         winner: null, round: r, position: i,
       });
@@ -75,15 +77,19 @@ function buildBracket(players: Player[]): Match[] {
   return matches;
 }
 
-function advanceWinner(matches: Match[], matchId: string, winner: Player): Match[] {
-  const updated = matches.map(m => m.id === matchId ? { ...m, winner } : m);
+function advanceWinner(matches: Match[], matchId: string, which: "p1" | "p2"): Match[] {
+  const updated = matches.map(m => m.id === matchId ? { ...m, winner: which as WinnerSlot } : m);
   const match   = updated.find(m => m.id === matchId)!;
+  const winningPlayer = which === "p1" ? match.player1 : match.player2;
   const nextId  = `${match.round + 1}-${Math.floor(match.position / 2)}`;
   const next    = updated.find(m => m.id === nextId);
   if (!next) return updated;
   const first = match.position % 2 === 0;
   return updated.map(m => m.id === nextId
-    ? { ...m, player1: first ? winner : m.player1, player2: first ? m.player2 : winner }
+    ? { ...m,
+        player1: first ? { ...winningPlayer } : m.player1,
+        player2: first ? m.player2 : { ...winningPlayer },
+      }
     : m);
 }
 
@@ -93,14 +99,22 @@ function decideByMultiplier(matches: Match[], matchId: string): Match[] {
   const a = parseFloat(m.mult1);
   const b = parseFloat(m.mult2);
   if (isNaN(a) || isNaN(b)) return matches;
-  const winner = a >= b ? m.player1 : m.player2;
-  return advanceWinner(matches, matchId, winner);
+  return advanceWinner(matches, matchId, a >= b ? "p1" : "p2");
 }
 
 function setMult(matches: Match[], matchId: string, which: 1 | 2, val: string): Match[] {
   return matches.map(m => m.id === matchId
     ? { ...m, [which === 1 ? "mult1" : "mult2"]: val } as Match
     : m);
+}
+
+function setPlayerField(matches: Match[], matchId: string, which: 1 | 2, field: keyof Player, val: string): Match[] {
+  return matches.map(m => {
+    if (m.id !== matchId) return m;
+    const p = which === 1 ? m.player1 : m.player2;
+    const updated = { ...p, [field]: val };
+    return which === 1 ? { ...m, player1: updated } : { ...m, player2: updated };
+  });
 }
 
 function getRoundLabel(round: number, totalRounds: number): string {
@@ -163,20 +177,23 @@ function BracketWires({ totalRounds }: { totalRounds: number }) {
 }
 
 // ── Match card ─────────────────────────────────────────────────────────────────
-function MatchCard({ match, onMultChange, onDecide }: {
+function MatchCard({ match, onMultChange, onPlayerChange, onDecide, onReset }: {
   match: Match;
   onMultChange: (which: 1 | 2, val: string) => void;
+  onPlayerChange: (which: 1 | 2, field: keyof Player, val: string) => void;
   onDecide: () => void;
+  onReset: () => void;
 }) {
-  const ready = match.player1.name !== "TBD" && match.player2.name !== "TBD";
+  const ready = match.player1.name.trim() !== "" && match.player2.name.trim() !== "";
   const bothFilled = match.mult1.trim() !== "" && match.mult2.trim() !== ""
     && !isNaN(parseFloat(match.mult1)) && !isNaN(parseFloat(match.mult2));
   const canDecide = ready && bothFilled && !match.winner;
+  const winnerName = match.winner === "p1" ? match.player1.name : match.winner === "p2" ? match.player2.name : null;
 
   const renderRow = (player: Player, mult: string, which: 1 | 2, isFirst: boolean) => {
-    const isWinner = match.winner?.name === player.name && match.winner?.slot === player.slot;
+    const isWinner = (which === 1 && match.winner === "p1") || (which === 2 && match.winner === "p2");
     const isLoser  = match.winner !== null && !isWinner;
-    const isTBD    = player.name === "TBD";
+    const initial  = player.name.trim() ? player.name.trim().charAt(0).toUpperCase() : "?";
     return (
       <div
         className={`flex items-center gap-2 px-2.5 transition-all
@@ -188,35 +205,35 @@ function MatchCard({ match, onMultChange, onDecide }: {
       >
         <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black border
           ${isWinner ? "bg-[#00ff87]/20 text-[#00ff87] border-[#00ff87]/30"
-            : isTBD ? "bg-white/5 text-white/25 border-white/10"
             : "bg-white/5 text-white/50 border-white/10"}`}>
-          {isTBD ? "?" : player.name.charAt(0).toUpperCase()}
+          {initial}
         </div>
-        <div className="flex-1 min-w-0">
-          <p className={`text-sm font-bold truncate leading-tight
-            ${isWinner ? "text-[#00ff87]" : isTBD ? "text-white/30 italic" : "text-white/75"}`}>
-            {player.name}
-          </p>
-          {player.slot && (
-            <p className="text-[10px] text-white/35 truncate leading-tight mt-0.5">{player.slot}</p>
-          )}
-        </div>
-        {match.winner ? (
-          <div className={`px-2 py-0.5 rounded-md text-[10px] font-black flex-shrink-0
-            ${isWinner ? "bg-[#00ff87]/20 text-[#00ff87]" : "bg-red-500/15 text-red-400/70"}`}>
-            {mult || "—"}x
-          </div>
-        ) : (
+        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
           <input
-            type="number"
-            step="any"
-            value={mult}
-            onChange={e => onMultChange(which, e.target.value)}
-            disabled={isTBD}
-            placeholder="0"
-            className="w-14 bg-[#1a1a1a] border border-white/10 rounded-md px-1.5 py-1 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-[#00ff87]/40 transition-colors text-right disabled:opacity-30 flex-shrink-0"
+            value={player.name}
+            onChange={e => onPlayerChange(which, "name", e.target.value)}
+            placeholder="Name"
+            className={`w-full bg-transparent border-0 p-0 text-sm font-bold focus:outline-none truncate
+              ${isWinner ? "text-[#00ff87]" : "text-white/80 placeholder:text-white/25"}`}
           />
-        )}
+          <input
+            value={player.slot}
+            onChange={e => onPlayerChange(which, "slot", e.target.value)}
+            placeholder="Slot"
+            className="w-full bg-transparent border-0 p-0 text-[10px] text-white/55 placeholder:text-white/20 focus:outline-none truncate"
+          />
+        </div>
+        <input
+          type="text"
+          inputMode="decimal"
+          value={mult}
+          onChange={e => onMultChange(which, e.target.value)}
+          placeholder="0"
+          className={`w-14 rounded-md px-1.5 py-1 text-xs placeholder:text-white/20 focus:outline-none transition-colors text-right flex-shrink-0
+            ${isWinner ? "bg-[#00ff87]/15 border border-[#00ff87]/30 text-[#00ff87]"
+              : isLoser ? "bg-red-500/10 border border-red-500/20 text-red-400/70"
+              : "bg-[#1a1a1a] border border-white/10 text-white focus:border-[#00ff87]/40"}`}
+        />
         {isWinner && <Trophy size={11} className="text-[#00ff87] flex-shrink-0" />}
       </div>
     );
@@ -232,10 +249,14 @@ function MatchCard({ match, onMultChange, onDecide }: {
       {renderRow(match.player1, match.mult1, 1, true)}
       {renderRow(match.player2, match.mult2, 2, false)}
       <div style={{ height: FOOTER_H }} className="border-t border-white/[0.07]">
-        {match.winner ? (
-          <div className="h-full flex items-center justify-center text-[10px] font-black tracking-widest text-[#00ff87]/70 uppercase">
-            <Trophy size={10} className="mr-1" /> {match.winner.name}
-          </div>
+        {winnerName ? (
+          <button
+            onClick={onReset}
+            title="Reset match"
+            className="w-full h-full flex items-center justify-center gap-1 text-[10px] font-black tracking-widest text-[#00ff87]/70 hover:text-red-400/80 hover:bg-red-500/5 uppercase transition-all"
+          >
+            <Trophy size={10} /> {winnerName} <span className="opacity-40 ml-1">↺</span>
+          </button>
         ) : canDecide ? (
           <button
             onClick={onDecide}
@@ -280,8 +301,14 @@ export default function AdminTournament() {
   const onMultChange = (id: string, which: 1 | 2, val: string) =>
     setMatches(prev => setMult(prev, id, which, val));
 
+  const onPlayerChange = (id: string, which: 1 | 2, field: keyof Player, val: string) =>
+    setMatches(prev => setPlayerField(prev, id, which, field, val));
+
   const onDecide = (id: string) =>
     setMatches(prev => decideByMultiplier(prev, id));
+
+  const onReset = (id: string) =>
+    setMatches(prev => prev.map(m => m.id === id ? { ...m, winner: null } : m));
 
   const reset = () => {
     setPhase("size");
@@ -290,7 +317,10 @@ export default function AdminTournament() {
   };
 
   const totalRounds = Math.log2(size);
-  const champion    = matches.find(m => m.round === totalRounds - 1)?.winner;
+  const finalMatch  = matches.find(m => m.round === totalRounds - 1);
+  const champion    = finalMatch?.winner === "p1" ? finalMatch.player1
+                    : finalMatch?.winner === "p2" ? finalMatch.player2
+                    : null;
   const rounds      = Array.from({ length: totalRounds }, (_, r) => matches.filter(m => m.round === r));
   const winnerTop   = padTop(totalRounds - 1) + CARD_H / 2 - WIN_H / 2;
 
@@ -410,7 +440,9 @@ export default function AdminTournament() {
                           key={match.id}
                           match={match}
                           onMultChange={(which, val) => onMultChange(match.id, which, val)}
+                          onPlayerChange={(which, field, val) => onPlayerChange(match.id, which, field, val)}
                           onDecide={() => onDecide(match.id)}
+                          onReset={() => onReset(match.id)}
                         />
                       ))}
                     </div>
