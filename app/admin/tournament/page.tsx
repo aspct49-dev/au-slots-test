@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Swords, Plus, Trophy, RotateCcw, ChevronRight, ChevronLeft } from "lucide-react";
+import { Swords, Trophy, RotateCcw, ChevronRight } from "lucide-react";
 
 type BracketSize = 4 | 8 | 16 | 32;
-type Phase = "size" | "details" | "bracket";
+type Phase = "size" | "bracket";
 
 interface Player {
   name: string;
@@ -278,23 +278,11 @@ function MatchCard({ match, onMultChange, onPlayerChange, onDecide, onReset }: {
 export default function AdminTournament() {
   const [phase, setPhase]         = useState<Phase>("size");
   const [size, setSize]           = useState<BracketSize>(8);
-  const [players, setPlayers]     = useState<Player[]>(Array(8).fill(null).map(() => ({ name: "", slot: "" })));
   const [matches, setMatches]     = useState<Match[]>([]);
   const [tournamentName, setTournamentName] = useState("Slot Tournament");
 
-  const handleSizeChange = (s: BracketSize) => {
-    setSize(s);
-    setPlayers(Array(s).fill(null).map(() => ({ name: "", slot: "" })));
-  };
-
-  const goToDetails = () => setPhase("details");
-
   const startTournament = () => {
-    const filled = players.map((p, i) => ({
-      name: p.name.trim() || `Player ${i + 1}`,
-      slot: p.slot.trim(),
-    }));
-    setMatches(buildBracket(filled));
+    setMatches(buildBracket(Array(size).fill(null).map(() => ({ name: "", slot: "" }))));
     setPhase("bracket");
   };
 
@@ -313,7 +301,6 @@ export default function AdminTournament() {
   const reset = () => {
     setPhase("size");
     setMatches([]);
-    setPlayers(Array(size).fill(null).map(() => ({ name: "", slot: "" })));
   };
 
   const totalRounds = Math.log2(size);
@@ -353,7 +340,7 @@ export default function AdminTournament() {
               <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-3">Bracket Size</label>
               <div className="flex gap-3">
                 {([4,8,16,32] as BracketSize[]).map(s => (
-                  <button key={s} onClick={() => handleSizeChange(s)}
+                  <button key={s} onClick={() => setSize(s)}
                     className={`flex-1 py-3 rounded-xl text-sm font-black tracking-wider transition-all ${size===s?"bg-[#00ff87] text-black":"bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"}`}>
                     {s}
                   </button>
@@ -361,48 +348,9 @@ export default function AdminTournament() {
               </div>
               <p className="text-[11px] text-white/30 mt-3">{size} participants — {Math.log2(size)} rounds</p>
             </div>
-            <button onClick={goToDetails} className="flex items-center gap-2 px-6 py-3 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all">
-              Next: Add Participants <ChevronRight size={16} />
+            <button onClick={startTournament} className="flex items-center gap-2 px-6 py-3 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all">
+              Create Bracket <ChevronRight size={16} />
             </button>
-          </motion.div>
-        )}
-
-        {phase === "details" && (
-          <motion.div key="details" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Participants & Slots</label>
-                <span className="text-[11px] text-white/30">{size} players · enter name + slot they&apos;ll play</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {players.map((p, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-[#1a1a1a] border border-white/[0.06] rounded-xl p-2.5">
-                    <span className="text-xs text-white/30 font-black w-6 text-center flex-shrink-0">{i+1}</span>
-                    <input
-                      value={p.name}
-                      onChange={e => { const n=[...players]; n[i] = { ...n[i], name: e.target.value }; setPlayers(n); }}
-                      placeholder={`Player ${i+1}`}
-                      className="flex-1 min-w-0 bg-transparent border-0 px-2 py-1.5 text-sm text-white placeholder:text-white/25 focus:outline-none"
-                    />
-                    <span className="text-white/15 text-xs">·</span>
-                    <input
-                      value={p.slot}
-                      onChange={e => { const n=[...players]; n[i] = { ...n[i], slot: e.target.value }; setPlayers(n); }}
-                      placeholder="Slot game"
-                      className="flex-1 min-w-0 bg-transparent border-0 px-2 py-1.5 text-xs text-white/70 placeholder:text-white/25 focus:outline-none"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => setPhase("size")} className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 text-white/60 font-bold text-sm rounded-xl transition-all">
-                <ChevronLeft size={16} /> Back
-              </button>
-              <button onClick={startTournament} className="flex items-center gap-2 px-6 py-3 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all">
-                <Plus size={16} /> Create Bracket
-              </button>
-            </div>
           </motion.div>
         )}
 
