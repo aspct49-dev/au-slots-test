@@ -2,68 +2,104 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Swords, Plus, Trophy, RotateCcw, ChevronRight } from "lucide-react";
+import { Swords, Plus, Trophy, RotateCcw, ChevronRight, ChevronLeft } from "lucide-react";
 
 type BracketSize = 4 | 8 | 16 | 32;
+type Phase = "size" | "details" | "bracket";
+
+interface Player {
+  name: string;
+  slot: string;
+}
 
 interface Match {
   id: string;
-  player1: string;
-  player2: string;
-  winner: string | null;
+  player1: Player;
+  player2: Player;
+  mult1: string;
+  mult2: string;
+  winner: Player | null;
   round: number;
   position: number;
 }
 
+const TBD: Player = { name: "TBD", slot: "" };
+
 // ── Layout constants ───────────────────────────────────────────────────────────
-const ROW_H   = 40;               // px — height of each player row inside a card
-const CARD_H  = ROW_H * 2 + 2;   // 82px — two rows + 1px divider + 1px outer border
-const BASE_GAP = 14;              // gap between round-0 cards
-const SLOT    = CARD_H + BASE_GAP;// 96px
-const COL_W   = 192;
-const COL_GAP = 40;
-const LABEL_H = 30;               // label text row height (incl. margin)
-const WIN_H   = 56;
+const ROW_H    = 56;               // taller row to fit name + slot subtitle
+const FOOTER_H = 26;               // decide-winner footer
+const CARD_H   = ROW_H * 2 + 2 + FOOTER_H;
+const BASE_GAP = 14;
+const SLOT_PX  = CARD_H + BASE_GAP;
+const COL_W    = 220;
+const COL_GAP  = 44;
+const LABEL_H  = 30;
+const WIN_H    = 64;
 
-function padTop(r: number)   { return (SLOT / 2) * (Math.pow(2, r) - 1); }
-function gapBetween(r: number){ return SLOT * Math.pow(2, r) - CARD_H; }
+function padTop(r: number)   { return (SLOT_PX / 2) * (Math.pow(2, r) - 1); }
+function gapBetween(r: number){ return SLOT_PX * Math.pow(2, r) - CARD_H; }
 
-/** Y-centre of match card (r, i) */
 function cardCenterY(r: number, i: number) {
   return LABEL_H + padTop(r) + i * (CARD_H + gapBetween(r)) + CARD_H / 2;
 }
-/** Y-centre of player row 0 or 1 inside match (r, i) */
 function rowCenterY(r: number, i: number, row: 0 | 1) {
   const cardTop = LABEL_H + padTop(r) + i * (CARD_H + gapBetween(r));
   return row === 0
-    ? cardTop + 1 + ROW_H / 2          // top row centre (skip 1px card top border)
-    : cardTop + 1 + ROW_H + 1 + ROW_H / 2; // bot row centre (skip divider)
+    ? cardTop + 1 + ROW_H / 2
+    : cardTop + 1 + ROW_H + 1 + ROW_H / 2;
 }
 
 // ── Bracket data helpers ───────────────────────────────────────────────────────
-function buildBracket(players: string[]): Match[] {
+function buildBracket(players: Player[]): Match[] {
   const matches: Match[] = [];
   const size = players.length;
   for (let i = 0; i < size / 2; i++)
-    matches.push({ id: `0-${i}`, player1: players[i*2]??"TBD", player2: players[i*2+1]??"TBD", winner: null, round: 0, position: i });
+    matches.push({
+      id: `0-${i}`,
+      player1: players[i*2] ?? TBD,
+      player2: players[i*2+1] ?? TBD,
+      mult1: "", mult2: "",
+      winner: null, round: 0, position: i,
+    });
   const totalRounds = Math.log2(size);
   for (let r = 1; r < totalRounds; r++) {
     const count = size / Math.pow(2, r + 1);
     for (let i = 0; i < count; i++)
-      matches.push({ id: `${r}-${i}`, player1: "TBD", player2: "TBD", winner: null, round: r, position: i });
+      matches.push({
+        id: `${r}-${i}`,
+        player1: TBD, player2: TBD,
+        mult1: "", mult2: "",
+        winner: null, round: r, position: i,
+      });
   }
   return matches;
 }
 
-function advanceWinner(matches: Match[], matchId: string, winner: string): Match[] {
+function advanceWinner(matches: Match[], matchId: string, winner: Player): Match[] {
   const updated = matches.map(m => m.id === matchId ? { ...m, winner } : m);
   const match   = updated.find(m => m.id === matchId)!;
   const nextId  = `${match.round + 1}-${Math.floor(match.position / 2)}`;
   const next    = updated.find(m => m.id === nextId);
   if (!next) return updated;
-  const first   = match.position % 2 === 0;
+  const first = match.position % 2 === 0;
   return updated.map(m => m.id === nextId
     ? { ...m, player1: first ? winner : m.player1, player2: first ? m.player2 : winner }
+    : m);
+}
+
+function decideByMultiplier(matches: Match[], matchId: string): Match[] {
+  const m = matches.find(x => x.id === matchId);
+  if (!m) return matches;
+  const a = parseFloat(m.mult1);
+  const b = parseFloat(m.mult2);
+  if (isNaN(a) || isNaN(b)) return matches;
+  const winner = a >= b ? m.player1 : m.player2;
+  return advanceWinner(matches, matchId, winner);
+}
+
+function setMult(matches: Match[], matchId: string, which: 1 | 2, val: string): Match[] {
+  return matches.map(m => m.id === matchId
+    ? { ...m, [which === 1 ? "mult1" : "mult2"]: val } as Match
     : m);
 }
 
@@ -86,38 +122,29 @@ function BracketWires({ totalRounds }: { totalRounds: number }) {
   const els: React.ReactNode[] = [];
 
   for (let r = 0; r < totalRounds; r++) {
-    const xRight = r * (COL_W + COL_GAP) + COL_W;   // right edge of col r
-    const xLeft1 = (r + 1) * (COL_W + COL_GAP);     // left edge of col r+1
+    const xRight = r * (COL_W + COL_GAP) + COL_W;
+    const xLeft1 = (r + 1) * (COL_W + COL_GAP);
     const xMid   = xRight + COL_GAP / 2;
 
     if (r < totalRounds - 1) {
-      // Connect pairs of round-r matches → round-(r+1) match
       const numNext = Math.pow(2, totalRounds - 2 - r);
       for (let j = 0; j < numNext; j++) {
-        // The two feeder matches
         const topY = cardCenterY(r, j * 2);
         const botY = cardCenterY(r, j * 2 + 1);
-        // Target player rows in the next-round match
-        const tgt0 = rowCenterY(r + 1, j, 0);  // top player row
-        const tgt1 = rowCenterY(r + 1, j, 1);  // bot player row
+        const tgt0 = rowCenterY(r + 1, j, 0);
+        const tgt1 = rowCenterY(r + 1, j, 1);
 
         els.push(
           <g key={`w-${r}-${j}`} stroke={S} strokeWidth={1.5} fill="none" strokeLinecap="square" strokeLinejoin="miter">
-            {/* Arm: right edge of top feeder → midX */}
             <line x1={xRight} y1={topY} x2={xMid} y2={topY} />
-            {/* Arm: right edge of bot feeder → midX */}
             <line x1={xRight} y1={botY} x2={xMid} y2={botY} />
-            {/* Vertical bar at midX spanning both feeders */}
             <line x1={xMid} y1={topY} x2={xMid} y2={botY} />
-            {/* Output: midX → top player row of next match */}
             <polyline points={`${xMid},${topY} ${xMid},${tgt0} ${xLeft1},${tgt0}`} />
-            {/* Output: midX → bot player row of next match */}
             <polyline points={`${xMid},${botY} ${xMid},${tgt1} ${xLeft1},${tgt1}`} />
           </g>
         );
       }
     } else {
-      // Final → winner slot
       const finalY  = cardCenterY(r, 0);
       const winnerY = LABEL_H + padTop(totalRounds - 1) + CARD_H / 2;
       els.push(
@@ -136,8 +163,65 @@ function BracketWires({ totalRounds }: { totalRounds: number }) {
 }
 
 // ── Match card ─────────────────────────────────────────────────────────────────
-function MatchCard({ match, onWinner }: { match: Match; onWinner: (w: string) => void }) {
-  const canAdvance = match.player1 !== "TBD" && match.player2 !== "TBD" && !match.winner;
+function MatchCard({ match, onMultChange, onDecide }: {
+  match: Match;
+  onMultChange: (which: 1 | 2, val: string) => void;
+  onDecide: () => void;
+}) {
+  const ready = match.player1.name !== "TBD" && match.player2.name !== "TBD";
+  const bothFilled = match.mult1.trim() !== "" && match.mult2.trim() !== ""
+    && !isNaN(parseFloat(match.mult1)) && !isNaN(parseFloat(match.mult2));
+  const canDecide = ready && bothFilled && !match.winner;
+
+  const renderRow = (player: Player, mult: string, which: 1 | 2, isFirst: boolean) => {
+    const isWinner = match.winner?.name === player.name && match.winner?.slot === player.slot;
+    const isLoser  = match.winner !== null && !isWinner;
+    const isTBD    = player.name === "TBD";
+    return (
+      <div
+        className={`flex items-center gap-2 px-2.5 transition-all
+          ${isFirst ? "border-b border-white/[0.07]" : ""}
+          ${isWinner ? "bg-[#00ff87]/10" : ""}
+          ${isLoser ? "opacity-40" : ""}
+        `}
+        style={{ height: ROW_H }}
+      >
+        <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black border
+          ${isWinner ? "bg-[#00ff87]/20 text-[#00ff87] border-[#00ff87]/30"
+            : isTBD ? "bg-white/5 text-white/25 border-white/10"
+            : "bg-white/5 text-white/50 border-white/10"}`}>
+          {isTBD ? "?" : player.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-bold truncate leading-tight
+            ${isWinner ? "text-[#00ff87]" : isTBD ? "text-white/30 italic" : "text-white/75"}`}>
+            {player.name}
+          </p>
+          {player.slot && (
+            <p className="text-[10px] text-white/35 truncate leading-tight mt-0.5">{player.slot}</p>
+          )}
+        </div>
+        {match.winner ? (
+          <div className={`px-2 py-0.5 rounded-md text-[10px] font-black flex-shrink-0
+            ${isWinner ? "bg-[#00ff87]/20 text-[#00ff87]" : "bg-red-500/15 text-red-400/70"}`}>
+            {mult || "—"}x
+          </div>
+        ) : (
+          <input
+            type="number"
+            step="any"
+            value={mult}
+            onChange={e => onMultChange(which, e.target.value)}
+            disabled={isTBD}
+            placeholder="0"
+            className="w-14 bg-[#1a1a1a] border border-white/10 rounded-md px-1.5 py-1 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-[#00ff87]/40 transition-colors text-right disabled:opacity-30 flex-shrink-0"
+          />
+        )}
+        {isWinner && <Trophy size={11} className="text-[#00ff87] flex-shrink-0" />}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col flex-shrink-0 rounded-xl overflow-hidden"
       style={{
@@ -145,42 +229,65 @@ function MatchCard({ match, onWinner }: { match: Match; onWinner: (w: string) =>
         border: `1px solid ${match.winner ? "rgba(0,255,135,0.3)" : "rgba(255,255,255,0.07)"}`,
         background: "#111111",
       }}>
-      {([match.player1, match.player2] as const).map((player, i) => (
-        <button
-          key={i}
-          disabled={!canAdvance || player === "TBD"}
-          onClick={() => canAdvance && player !== "TBD" && onWinner(player)}
-          style={{ height: ROW_H }}
-          className={`w-full text-left px-3 flex items-center justify-between group transition-all
-            ${i === 0 ? "border-b border-white/[0.07]" : ""}
-            ${match.winner === player ? "text-[#00ff87] bg-[#00ff87]/10" : "text-white/60"}
-            ${canAdvance && player !== "TBD" ? "hover:bg-white/5 hover:text-white cursor-pointer" : "cursor-default"}
-            ${player === "TBD" ? "text-white/25 italic" : ""}
-          `}
-        >
-          <span className="text-sm font-semibold truncate pr-1">{player}</span>
-          {match.winner === player && <Trophy size={11} className="text-[#00ff87] flex-shrink-0" />}
-          {canAdvance && player !== "TBD" && match.winner !== player && (
-            <ChevronRight size={11} className="opacity-0 group-hover:opacity-100 text-white/40 flex-shrink-0 transition-all" />
-          )}
-        </button>
-      ))}
+      {renderRow(match.player1, match.mult1, 1, true)}
+      {renderRow(match.player2, match.mult2, 2, false)}
+      <div style={{ height: FOOTER_H }} className="border-t border-white/[0.07]">
+        {match.winner ? (
+          <div className="h-full flex items-center justify-center text-[10px] font-black tracking-widest text-[#00ff87]/70 uppercase">
+            <Trophy size={10} className="mr-1" /> {match.winner.name}
+          </div>
+        ) : canDecide ? (
+          <button
+            onClick={onDecide}
+            className="w-full h-full bg-[#00ff87]/10 hover:bg-[#00ff87]/25 text-[#00ff87] text-[10px] font-black tracking-widest uppercase transition-all"
+          >
+            Decide Winner
+          </button>
+        ) : (
+          <div className="h-full flex items-center justify-center text-[10px] tracking-widest text-white/20 uppercase">
+            {ready ? "Enter multipliers" : "Awaiting players"}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default function AdminTournament() {
-  const [phase, setPhase]               = useState<"setup"|"bracket">("setup");
-  const [size, setSize]                 = useState<BracketSize>(8);
-  const [playerNames, setPlayerNames]   = useState<string[]>(Array(8).fill(""));
-  const [matches, setMatches]           = useState<Match[]>([]);
+  const [phase, setPhase]         = useState<Phase>("size");
+  const [size, setSize]           = useState<BracketSize>(8);
+  const [players, setPlayers]     = useState<Player[]>(Array(8).fill(null).map(() => ({ name: "", slot: "" })));
+  const [matches, setMatches]     = useState<Match[]>([]);
   const [tournamentName, setTournamentName] = useState("Slot Tournament");
 
-  const handleSizeChange = (s: BracketSize) => { setSize(s); setPlayerNames(Array(s).fill("")); };
-  const startTournament  = () => { setMatches(buildBracket(playerNames.map((n,i) => n.trim() || `Player ${i+1}`))); setPhase("bracket"); };
-  const handleWinner     = (id: string, w: string) => setMatches(prev => advanceWinner(prev, id, w));
-  const reset            = () => { setPhase("setup"); setMatches([]); setPlayerNames(Array(size).fill("")); };
+  const handleSizeChange = (s: BracketSize) => {
+    setSize(s);
+    setPlayers(Array(s).fill(null).map(() => ({ name: "", slot: "" })));
+  };
+
+  const goToDetails = () => setPhase("details");
+
+  const startTournament = () => {
+    const filled = players.map((p, i) => ({
+      name: p.name.trim() || `Player ${i + 1}`,
+      slot: p.slot.trim(),
+    }));
+    setMatches(buildBracket(filled));
+    setPhase("bracket");
+  };
+
+  const onMultChange = (id: string, which: 1 | 2, val: string) =>
+    setMatches(prev => setMult(prev, id, which, val));
+
+  const onDecide = (id: string) =>
+    setMatches(prev => decideByMultiplier(prev, id));
+
+  const reset = () => {
+    setPhase("size");
+    setMatches([]);
+    setPlayers(Array(size).fill(null).map(() => ({ name: "", slot: "" })));
+  };
 
   const totalRounds = Math.log2(size);
   const champion    = matches.find(m => m.round === totalRounds - 1)?.winner;
@@ -194,7 +301,7 @@ export default function AdminTournament() {
           <h1 className="text-2xl font-black text-white flex items-center gap-2">
             <Swords size={20} className="text-[#00ff87]" /> Tournament Bracket
           </h1>
-          <p className="text-white/40 text-sm mt-0.5">Single elimination — up to 32 players</p>
+          <p className="text-white/40 text-sm mt-0.5">Single elimination — highest multiplier wins each match</p>
         </div>
         {phase === "bracket" && (
           <button onClick={reset} className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 font-bold text-sm rounded-xl transition-all">
@@ -204,8 +311,8 @@ export default function AdminTournament() {
       </div>
 
       <AnimatePresence mode="wait">
-        {phase === "setup" ? (
-          <motion.div key="setup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+        {phase === "size" && (
+          <motion.div key="size" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
             <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Tournament Name</label>
               <input value={tournamentName} onChange={e => setTournamentName(e.target.value)}
@@ -222,24 +329,54 @@ export default function AdminTournament() {
                   </button>
                 ))}
               </div>
+              <p className="text-[11px] text-white/30 mt-3">{size} participants — {Math.log2(size)} rounds</p>
             </div>
+            <button onClick={goToDetails} className="flex items-center gap-2 px-6 py-3 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all">
+              Next: Add Participants <ChevronRight size={16} />
+            </button>
+          </motion.div>
+        )}
+
+        {phase === "details" && (
+          <motion.div key="details" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
             <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
-              <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-4">Player Names</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {playerNames.map((name, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="text-xs text-white/30 w-5 text-right flex-shrink-0">{i+1}</span>
-                    <input value={name} onChange={e => { const n=[...playerNames]; n[i]=e.target.value; setPlayerNames(n); }} placeholder={`Player ${i+1}`}
-                      className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#00ff87]/40 transition-colors" />
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Participants & Slots</label>
+                <span className="text-[11px] text-white/30">{size} players · enter name + slot they&apos;ll play</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {players.map((p, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-[#1a1a1a] border border-white/[0.06] rounded-xl p-2.5">
+                    <span className="text-xs text-white/30 font-black w-6 text-center flex-shrink-0">{i+1}</span>
+                    <input
+                      value={p.name}
+                      onChange={e => { const n=[...players]; n[i] = { ...n[i], name: e.target.value }; setPlayers(n); }}
+                      placeholder={`Player ${i+1}`}
+                      className="flex-1 min-w-0 bg-transparent border-0 px-2 py-1.5 text-sm text-white placeholder:text-white/25 focus:outline-none"
+                    />
+                    <span className="text-white/15 text-xs">·</span>
+                    <input
+                      value={p.slot}
+                      onChange={e => { const n=[...players]; n[i] = { ...n[i], slot: e.target.value }; setPlayers(n); }}
+                      placeholder="Slot game"
+                      className="flex-1 min-w-0 bg-transparent border-0 px-2 py-1.5 text-xs text-white/70 placeholder:text-white/25 focus:outline-none"
+                    />
                   </div>
                 ))}
               </div>
             </div>
-            <button onClick={startTournament} className="flex items-center gap-2 px-6 py-3 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all">
-              <Plus size={16} /> Create Bracket
-            </button>
+            <div className="flex gap-3">
+              <button onClick={() => setPhase("size")} className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 text-white/60 font-bold text-sm rounded-xl transition-all">
+                <ChevronLeft size={16} /> Back
+              </button>
+              <button onClick={startTournament} className="flex items-center gap-2 px-6 py-3 bg-[#00ff87] hover:bg-[#00e676] text-black font-black text-sm rounded-xl transition-all">
+                <Plus size={16} /> Create Bracket
+              </button>
+            </div>
           </motion.div>
-        ) : (
+        )}
+
+        {phase === "bracket" && (
           <motion.div key="bracket" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
             <AnimatePresence>
               {champion && (
@@ -248,14 +385,14 @@ export default function AdminTournament() {
                   <Trophy size={28} className="text-[#00ff87]" />
                   <div>
                     <p className="text-xs font-bold tracking-widest text-[#00ff87]/60 uppercase">Champion</p>
-                    <p className="text-2xl font-black text-[#00ff87]">{champion}</p>
-                    <p className="text-xs text-white/40">{tournamentName}</p>
+                    <p className="text-2xl font-black text-[#00ff87]">{champion.name}</p>
+                    <p className="text-xs text-white/40">{champion.slot || tournamentName}</p>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <p className="text-xs text-white/30">Click a player name to advance them to the next round.</p>
+            <p className="text-xs text-white/30">Enter both multipliers, then click <span className="text-[#00ff87]/80 font-bold">Decide Winner</span> — the higher multiplier advances.</p>
 
             <div className="overflow-x-auto pb-6">
               <div className="relative inline-flex items-start" style={{ gap: 0 }}>
@@ -269,13 +406,17 @@ export default function AdminTournament() {
                     </p>
                     <div className="flex flex-col" style={{ paddingTop: padTop(r), gap: gapBetween(r) }}>
                       {roundMatches.map(match => (
-                        <MatchCard key={match.id} match={match} onWinner={w => handleWinner(match.id, w)} />
+                        <MatchCard
+                          key={match.id}
+                          match={match}
+                          onMultChange={(which, val) => onMultChange(match.id, which, val)}
+                          onDecide={() => onDecide(match.id)}
+                        />
                       ))}
                     </div>
                   </div>
                 ))}
 
-                {/* Winner column */}
                 <div className="flex flex-col flex-shrink-0" style={{ width: COL_W }}>
                   <p className="text-[11px] font-black tracking-widest text-[#00ff87]/60 uppercase text-center"
                     style={{ height: LABEL_H, lineHeight: `${LABEL_H}px` }}>
@@ -287,7 +428,10 @@ export default function AdminTournament() {
                       {champion ? (
                         <div className="flex items-center gap-2 min-w-0">
                           <Trophy size={14} className="text-[#00ff87] flex-shrink-0" />
-                          <span className="text-sm font-black text-[#00ff87] truncate">{champion}</span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-black text-[#00ff87] truncate">{champion.name}</p>
+                            {champion.slot && <p className="text-[10px] text-[#00ff87]/60 truncate">{champion.slot}</p>}
+                          </div>
                         </div>
                       ) : (
                         <span className="text-white/25 text-sm italic">TBD</span>
