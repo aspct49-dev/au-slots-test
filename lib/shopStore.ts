@@ -25,6 +25,7 @@ export interface Redemption {
   fulfilledAt?: number;
   rejectedAt?: number;
   rejectionReason?: string;
+  handledBy?: string;
   viperSpinEmail?: string;
   zestyBetInfo?: string;
   discordUsername?: string;
@@ -61,6 +62,7 @@ function rowToRedemption(row: any): Redemption {
     fulfilledAt:      row.fulfilled_at  ? Number(row.fulfilled_at)  : undefined,
     rejectedAt:       row.rejected_at   ? Number(row.rejected_at)   : undefined,
     rejectionReason:  row.rejection_reason  ?? undefined,
+    handledBy:        row.handled_by        ?? undefined,
     viperSpinEmail:   row.viper_spin_email  ?? undefined,
     zestyBetInfo:     row.zesty_bet_info    ?? undefined,
     discordUsername:  row.discord_username  ?? undefined,
@@ -140,18 +142,35 @@ export async function addRedemption(
   return rowToRedemption(rows[0]);
 }
 
-export async function fulfillRedemption(id: string): Promise<Redemption | null> {
+// handled_by was added after launch; create it on first use so existing databases don't need a manual migration.
+let handledByColumnReady: Promise<void> | null = null;
+function ensureHandledByColumn(): Promise<void> {
+  if (!handledByColumnReady) {
+    const ready: Promise<void> = pool
+      .query("ALTER TABLE redemptions ADD COLUMN IF NOT EXISTS handled_by TEXT")
+      .then(() => undefined)
+      .catch((err: unknown) => { handledByColumnReady = null; throw err; });
+    handledByColumnReady = ready;
+    return ready;
+  }
+  return handledByColumnReady;
+}
+
+// Only pending redemptions can be fulfilled/rejected, so two admins can't process the same one twice.
+export async function fulfillRedemption(id: string, admin: string): Promise<Redemption | null> {
+  await ensureHandledByColumn();
   const { rows } = await pool.query(
-    "UPDATE redemptions SET status='fulfilled', fulfilled_at=$2 WHERE id=$1 RETURNING *",
-    [id, Date.now()]
+    "UPDATE redemptions SET status='fulfilled', fulfilled_at=$2, handled_by=$3 WHERE id=$1 AND status='pending' RETURNING *",
+    [id, Date.now(), admin]
   );
   return rows[0] ? rowToRedemption(rows[0]) : null;
 }
 
-export async function rejectRedemption(id: string, reason: string): Promise<Redemption | null> {
+export async function rejectRedemption(id: string, reason: string, admin: string): Promise<Redemption | null> {
+  await ensureHandledByColumn();
   const { rows } = await pool.query(
-    "UPDATE redemptions SET status='rejected', rejected_at=$2, rejection_reason=$3 WHERE id=$1 RETURNING *",
-    [id, Date.now(), reason.trim() || "No reason provided"]
+    "UPDATE redemptions SET status='rejected', rejected_at=$2, rejection_reason=$3, handled_by=$4 WHERE id=$1 AND status='pending' RETURNING *",
+    [id, Date.now(), reason.trim() || "No reason provided", admin]
   );
   return rows[0] ? rowToRedemption(rows[0]) : null;
 }
@@ -160,6 +179,17 @@ export async function cancelRedemption(id: string): Promise<Redemption | null> {
   const { rows } = await pool.query(
     "UPDATE redemptions SET status='cancelled', rejected_at=$2 WHERE id=$1 AND status='pending' RETURNING *",
     [id, Date.now()]
+  );
+  return rows[0] ? rowToRedemption(rows[0]) : null;
+}
+
+// Undo a cancellation/rejection whose refund failed, so the redemption goes back to the admin queue.
+export async function restorePendingRedemption(id: string): Promise<Redemption | null> {
+  await ensureHandledByColumn();
+  const { rows } = await pool.query(
+    `UPDATE redemptions SET status='pending', rejected_at=NULL, rejection_reason=NULL, handled_by=NULL
+     WHERE id=$1 AND status IN ('cancelled','rejected') RETURNING *`,
+    [id]
   );
   return rows[0] ? rowToRedemption(rows[0]) : null;
 }

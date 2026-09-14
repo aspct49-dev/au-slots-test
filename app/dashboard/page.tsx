@@ -28,7 +28,7 @@ interface Redemption {
   spinCount: number;
   pointCost: number;
   redeemedAt: number;
-  status: "pending" | "fulfilled" | "rejected";
+  status: "pending" | "fulfilled" | "rejected" | "cancelled";
   fulfilledAt?: number;
   rejectedAt?: number;
   rejectionReason?: string;
@@ -42,7 +42,7 @@ interface PublicRedemption {
   spinCount: number;
   pointCost: number;
   redeemedAt: number;
-  status: "pending" | "fulfilled" | "rejected";
+  status: "pending" | "fulfilled" | "rejected" | "cancelled";
   fulfilledAt?: number;
   rejectedAt?: number;
 }
@@ -81,6 +81,14 @@ function StatusBadge({ status }: { status: Redemption["status"] }) {
       </span>
     );
   }
+  if (status === "cancelled") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/5 text-white/40 border border-white/10">
+        <XCircle size={11} />
+        CANCELLED
+      </span>
+    );
+  }
   if (status === "rejected") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20">
@@ -102,6 +110,12 @@ function StatusPill({ status }: { status: PublicRedemption["status"] }) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00ff87]/10 text-[#00ff87] border border-[#00ff87]/20">
         <CheckCircle2 size={9} /> DELIVERED
+      </span>
+    );
+  if (status === "cancelled")
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-white/40 border border-white/10">
+        <XCircle size={9} /> CANCELLED
       </span>
     );
   if (status === "rejected")

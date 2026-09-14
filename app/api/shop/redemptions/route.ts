@@ -6,7 +6,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const all = await getRedemptions();
 
-  const feed = all.map(r => ({
+  // Cancelled redemptions were refunded and never happened as far as players are concerned.
+  const feed = all.filter(r => r.status !== "cancelled").map(r => ({
     id:          r.id,
     username:    r.username,
     itemName:    r.itemName,

@@ -44,6 +44,7 @@ export default function RewardCard({
   const [submittingInfo, setSubmittingInfo] = useState(false);
   const [infoSubmitted, setInfoSubmitted] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState("");
 
   const canSubmitInfo = () => {
     const hasCasino = infoForm.viperSpinEmail.trim() || infoForm.zestyBetInfo.trim();
@@ -115,11 +116,13 @@ export default function RewardCard({
     setInfoSubmitted(false);
     setRedemptionId(null);
     setCancelling(false);
+    setCancelError("");
   };
 
   const handleCancel = async () => {
     if (!redemptionId) { closeModal(); return; }
     setCancelling(true);
+    setCancelError("");
     try {
       const res = await fetch("/api/points/redeem/cancel", {
         method: "POST",
@@ -127,8 +130,17 @@ export default function RewardCard({
         body: JSON.stringify({ redemptionId }),
       });
       const data = await res.json();
-      if (res.ok) setPoints(data.points);
-    } catch { /* silently close */ }
+      if (!res.ok) {
+        setCancelError(data.error ?? "Couldn't cancel your redemption. Please try again.");
+        setCancelling(false);
+        return;
+      }
+      setPoints(data.points);
+    } catch {
+      setCancelError("Couldn't cancel your redemption. Please try again.");
+      setCancelling(false);
+      return;
+    }
     closeModal();
   };
 
@@ -253,6 +265,10 @@ export default function RewardCard({
                       ? <><Loader2 size={14} className="animate-spin" /> Submitting…</>
                       : <><Send size={14} /> Submit Details</>}
                   </button>
+
+                  {cancelError && (
+                    <p className="mt-3 text-red-400 text-xs text-center">{cancelError}</p>
+                  )}
 
                   <button
                     onClick={handleCancel}

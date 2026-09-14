@@ -24,6 +24,7 @@ export default function AdminRedemptions() {
   const [rejectingId, setRejectingId]   = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejecting, setRejecting]       = useState(false);
+  const [actionError, setActionError]   = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -37,6 +38,7 @@ export default function AdminRedemptions() {
 
   const markFulfilled = async (id: string) => {
     setFulfilling(id);
+    setActionError("");
     const res = await fetch("/api/admin/redemptions", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -48,6 +50,10 @@ export default function AdminRedemptions() {
         p.map(r => r.id === id ? updated : r)
           .filter(r => filter === "all" || r.status === filter)
       );
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setActionError(data.error ?? "Couldn't mark this redemption as fulfilled.");
+      if (res.status === 409) load();
     }
     setFulfilling(null);
   };
@@ -64,6 +70,7 @@ export default function AdminRedemptions() {
 
   const confirmReject = async (id: string) => {
     setRejecting(true);
+    setActionError("");
     const res = await fetch("/api/admin/redemptions", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -75,6 +82,10 @@ export default function AdminRedemptions() {
         p.map(r => r.id === id ? updated : r)
           .filter(r => filter === "all" || r.status === filter)
       );
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setActionError(data.error ?? "Couldn't reject this redemption.");
+      if (res.status === 409) load();
     }
     setRejecting(false);
     setRejectingId(null);
@@ -98,6 +109,13 @@ export default function AdminRedemptions() {
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
+
+      {actionError && (
+        <div className="flex items-start justify-between gap-3 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          <span>{actionError}</span>
+          <button onClick={() => setActionError("")} className="text-red-400/60 hover:text-red-400"><X size={14} /></button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -151,12 +169,16 @@ export default function AdminRedemptions() {
                       ? "bg-yellow-500/15 border border-yellow-500/30"
                       : r.status === "rejected"
                       ? "bg-red-500/15 border border-red-500/30"
+                      : r.status === "cancelled"
+                      ? "bg-white/5 border border-white/10"
                       : "bg-[#00ff87]/10 border border-[#00ff87]/20"
                   }`}>
                     {r.status === "pending"
                       ? <Clock size={14} className="text-yellow-400" />
                       : r.status === "rejected"
                       ? <XCircle size={14} className="text-red-400" />
+                      : r.status === "cancelled"
+                      ? <XCircle size={14} className="text-white/40" />
                       : <CheckCircle size={14} className="text-[#00ff87]" />}
                   </div>
 
@@ -176,10 +198,13 @@ export default function AdminRedemptions() {
                     <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                       <span className="text-white/30 text-xs">{r.pointCost.toLocaleString()} pts · {timeAgo(r.redeemedAt)}</span>
                       {r.status === "fulfilled" && r.fulfilledAt && (
-                        <span className="text-[#00ff87]/40 text-xs">fulfilled {timeAgo(r.fulfilledAt)}</span>
+                        <span className="text-[#00ff87]/40 text-xs">fulfilled {timeAgo(r.fulfilledAt)}{r.handledBy ? ` by ${r.handledBy}` : ""}</span>
                       )}
                       {r.status === "rejected" && r.rejectedAt && (
-                        <span className="text-red-400/50 text-xs">rejected {timeAgo(r.rejectedAt)}</span>
+                        <span className="text-red-400/50 text-xs">rejected {timeAgo(r.rejectedAt)}{r.handledBy ? ` by ${r.handledBy}` : ""}</span>
+                      )}
+                      {r.status === "cancelled" && (
+                        <span className="text-white/40 text-xs">cancelled by player{r.rejectedAt ? ` ${timeAgo(r.rejectedAt)}` : ""}</span>
                       )}
                     </div>
                   </div>

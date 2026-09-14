@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS redemptions (
   fulfilled_at     BIGINT,
   rejected_at      BIGINT,
   rejection_reason TEXT,
+  handled_by       TEXT,
   viper_spin_email TEXT,
   zesty_bet_info   TEXT,
   discord_username TEXT,

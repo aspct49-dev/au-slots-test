@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { addBotrixPoints, getBotrixPoints } from "@/lib/botrix";
-import { cancelRedemption, incrementInventory, getRedemptions } from "@/lib/shopStore";
+import { cancelRedemption, restorePendingRedemption, incrementInventory, getRedemptions } from "@/lib/shopStore";
 
 export async function POST(req: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
@@ -28,16 +28,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Only pending redemptions can be cancelled" }, { status: 409 });
   }
 
-  await cancelRedemption(redemptionId);
-  await incrementInventory(redemption.itemId);
+  // Claim the cancellation atomically so a double-click can't refund twice.
+  const cancelled = await cancelRedemption(redemptionId);
+  if (!cancelled) {
+    return NextResponse.json({ error: "Only pending redemptions can be cancelled" }, { status: 409 });
+  }
 
   try {
     await addBotrixPoints(session.user.username, redemption.pointCost);
   } catch (err) {
-    console.error("[Cancel refund error]", err);
+    // Refund failed: put the redemption back to pending so the points aren't lost.
+    await restorePendingRedemption(redemptionId);
+    console.error(`[Cancel refund error] ${session.user.username} "${redemption.itemName}" (${redemption.pointCost} pts) — reverted to pending:`, err);
+    return NextResponse.json(
+      { error: "We couldn't refund your points, so your redemption is still pending. Please try again or contact an admin." },
+      { status: 502 }
+    );
   }
 
-  const newBalance = await getBotrixPoints(session.user.username);
+  await incrementInventory(redemption.itemId);
+  console.log(`[Cancel] ${session.user.username} cancelled "${redemption.itemName}" — refunded ${redemption.pointCost} pts`);
+
+  let newBalance = session.user.points ?? 0;
+  try {
+    newBalance = await getBotrixPoints(session.user.username);
+  } catch (err) {
+    console.error("[Cancel balance check error]", err);
+  }
   session.user.points = newBalance;
   await session.save();
 
