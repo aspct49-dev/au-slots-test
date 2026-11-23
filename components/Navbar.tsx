@@ -162,9 +162,12 @@ export default function Navbar() {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/[0.06]">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+            {/* Left spacer keeps the center nav truly centered on desktop */}
+            <div className="hidden lg:block" />
+
             {/* Center nav - desktop */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center justify-center gap-1">
               {navLinks.map((link) =>
                 link.dropdown === "socials" ? (
                   <div key={link.name} ref={socialsRef} className="relative">
@@ -267,7 +270,7 @@ export default function Navbar() {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-3 ml-auto lg:justify-self-end">
               {/* Schedule icon */}
               <Link href="/#schedule" className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10 hover:border-[#00ff87]/30 hover:bg-[#00ff87]/10 transition-all duration-200 group">
                 <CalendarDays size={16} className="text-white/40 group-hover:text-[#00ff87] transition-colors" />

@@ -127,7 +127,7 @@ export default function SponsorsSection() {
                     {sponsor.features.map(({ icon: Icon, label }) => (
                       <div
                         key={label}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold odd:last:col-span-2"
                         style={{
                           backgroundColor: `${sponsor.accentColor}0d`,
                           color: `${sponsor.accentColor}b3`,

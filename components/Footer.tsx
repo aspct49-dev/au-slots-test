@@ -30,6 +30,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
+            <h4 className="text-xs font-bold tracking-widest text-white/40 uppercase mb-4">
+              Follow Us
+            </h4>
+            <p className="text-white/40 text-sm leading-relaxed max-w-xs mb-5">
+              Earn points, win prizes, and be part of something epic.
+            </p>
             {/* Social icons */}
             <div className="flex items-center gap-3">
               <a href="https://kick.com/auslots" target="_blank" rel="noopener noreferrer"
