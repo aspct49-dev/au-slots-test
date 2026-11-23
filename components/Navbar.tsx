@@ -163,20 +163,6 @@ export default function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/[0.06]">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <Image
-                src="/images/logo.png"
-                alt="AUSlots"
-                width={96}
-                height={96}
-                className="rounded-xl transition-transform group-hover:scale-110"
-              />
-              <span className="font-black text-lg tracking-widest text-white group-hover:text-[#00ff87] transition-colors">
-                AUSLOTS
-              </span>
-            </Link>
-
             {/* Center nav - desktop */}
             <div className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) =>
@@ -281,7 +267,7 @@ export default function Navbar() {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 ml-auto">
               {/* Schedule icon */}
               <Link href="/#schedule" className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10 hover:border-[#00ff87]/30 hover:bg-[#00ff87]/10 transition-all duration-200 group">
                 <CalendarDays size={16} className="text-white/40 group-hover:text-[#00ff87] transition-colors" />

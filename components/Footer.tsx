@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Youtube, Instagram } from "lucide-react";
 
 const footerLinks = {
@@ -31,22 +30,6 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2.5 group mb-4">
-              <Image
-                src="/images/logo.png"
-                alt="AUSlots"
-                width={40}
-                height={40}
-                className="rounded-xl"
-              />
-              <span className="font-black text-xl tracking-widest text-white">
-                AUSLOTS
-              </span>
-            </Link>
-            <p className="text-white/40 text-sm leading-relaxed max-w-xs mb-6">
-              Australia&apos;s premier streaming rewards community. Earn points, win prizes,
-              and be part of something epic.
-            </p>
             {/* Social icons */}
             <div className="flex items-center gap-3">
               <a href="https://kick.com/auslots" target="_blank" rel="noopener noreferrer"
@@ -120,8 +103,7 @@ export default function Footer() {
         <div className="mt-6 p-4 rounded-xl bg-[#111111] border border-white/5">
           <p className="text-white/25 text-xs text-center leading-relaxed">
             theausofficial.com is a community rewards platform. Content is intended for entertainment purposes only.
-            Please gamble responsibly. If you have a gambling problem, seek help at{" "}
-            <span className="text-[#00ff87]/50">gamblinghelponline.org.au</span>.
+            Please gamble responsibly. If you have a gambling problem, seek help from a local support service.
             18+ only.
           </p>
         </div>

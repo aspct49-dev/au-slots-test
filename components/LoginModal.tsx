@@ -52,7 +52,7 @@ export default function LoginModal() {
 
                 <div className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 rounded-full bg-[#53fc18]/10 border border-[#53fc18]/20 flex items-center justify-center mb-4">
-                    <Image src="/images/logo.png" alt="AUSlots" width={48} height={48} className="rounded-full" />
+                    <Image src="/images/logo.png" alt="Logo" width={48} height={48} className="rounded-full" />
                   </div>
                   <h2 className="text-2xl font-bold text-white mb-1">WELCOME BACK</h2>
                   <p className="text-white/50 text-sm">

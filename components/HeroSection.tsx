@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Zap } from "lucide-react";
 import { BubbleText } from "@/components/ui/bubble-text";
@@ -144,54 +143,14 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-8 pt-24 sm:pt-32 pb-12 sm:pb-20 text-center">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 mb-5 sm:mb-8 max-w-[90vw] text-center"
-        >
-          <div className="relative w-2 h-2 flex-shrink-0">
-            <div className="w-2 h-2 rounded-full bg-[#00ff87]" />
-            <div className="absolute inset-0 rounded-full bg-[#00ff87] animate-ping opacity-75" />
-          </div>
-          <span className="text-[#00ff87] text-[10px] sm:text-sm font-bold tracking-wide sm:tracking-widest">
-            AUSTRALIA&apos;S #1 STREAMING REWARDS COMMUNITY
-          </span>
-        </motion.div>
-
         {/* Main headline */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="mb-5 sm:mb-6"
+          className="mb-8 sm:mb-10"
         >
           <BubbleText className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tight leading-none text-[#00ff87]/60">{"EARN REWARDS"}</BubbleText>
-        </motion.div>
-
-        {/* Mascot */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.3, type: "spring", stiffness: 200 }}
-          className="flex justify-center mb-6 sm:mb-8"
-        >
-          <div className="relative">
-            <motion.div
-              animate={{ y: [0, -12, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="filter drop-shadow-[0_0_20px_rgba(0,255,135,0.5)]"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/auslots_gif.gif"
-                alt="AUSlots Mascot"
-                className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-2xl"
-              />
-            </motion.div>
-            <div className="absolute inset-0 blur-2xl bg-[#00ff87]/20 rounded-full scale-150 -z-10" />
-          </div>
         </motion.div>
 
         {/* Sub-headline */}

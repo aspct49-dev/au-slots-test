@@ -8,7 +8,7 @@ export default function TermsOfService() {
         <div className="space-y-8 text-white/60 text-sm leading-relaxed">
 
           <p>
-            Welcome to TheAusOfficial / Auslots / Auslotsrewards (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;). By accessing or using our website (the &quot;Service&quot;), you agree to the following Terms of Service (&quot;Terms&quot;).
+            Welcome to TheAusOfficial (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;). By accessing or using our website (the &quot;Service&quot;), you agree to the following Terms of Service (&quot;Terms&quot;).
           </p>
           <p className="text-white/40 italic">If you do not agree, please do not use the Service.</p>
 

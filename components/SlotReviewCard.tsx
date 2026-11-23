@@ -115,7 +115,7 @@ export default function SlotReviewCard({ review, index, onViewReview }: Props) {
           <div className="flex flex-col gap-0.5">
             <StarRow rating={review.streamerRating} />
             <span className="text-[11px] text-white/40">
-              AUSlots:{" "}
+              Our rating:{" "}
               <span className="text-amber-400 font-bold">{review.streamerRating}/10</span>
             </span>
           </div>

@@ -45,7 +45,7 @@ function HowToEnter() {
     {
       icon: <Bell size={20} />,
       title: "FOLLOW & NOTIFY",
-      description: "Follow AUSlots on Kick and enable notifications to know instantly when giveaways go live.",
+      description: "Follow us on Kick and enable notifications to know instantly when giveaways go live.",
       color: "#f87171",
     },
     {

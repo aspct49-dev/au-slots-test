@@ -38,7 +38,7 @@ export default function EmptyState({
         )}
 
         <div className="w-16 h-16 rounded-full bg-[#00ff87]/5 border border-[#00ff87]/10 flex items-center justify-center mb-4">
-          <Image src="/images/logo.png" alt="AUSlots" width={40} height={40} className="rounded-full" />
+          <Image src="/images/logo.png" alt="Logo" width={40} height={40} className="rounded-full" />
         </div>
 
         <h3 className="text-white/70 font-bold text-xl mb-2">{title}</h3>

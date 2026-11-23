@@ -334,7 +334,7 @@ export default function AdminTournament() {
               <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Tournament Name</label>
               <input value={tournamentName} onChange={e => setTournamentName(e.target.value)}
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#00ff87]/40 transition-colors"
-                placeholder="e.g. AUSlots Slot Tournament" />
+                placeholder="e.g. Weekly Slot Tournament" />
             </div>
             <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-3">Bracket Size</label>

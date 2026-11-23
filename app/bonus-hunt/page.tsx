@@ -43,7 +43,7 @@ function PageHeader() {
 
 function HowItWorks() {
   const steps = [
-    { icon: <Target size={22} />, title: "HUNT STARTS", description: "AUSlots opens bonus buys across multiple games. Starting balance is shown.", color: "#fbbf24" },
+    { icon: <Target size={22} />, title: "HUNT STARTS", description: "We open bonus buys across multiple games. Starting balance is shown.", color: "#fbbf24" },
     { icon: <TrendingUp size={22} />, title: "MAKE YOUR PREDICTION", description: "Guess what the final balance will be when all bonuses are done. You can update your guess while entries are open.", color: "#00ff87" },
     { icon: <Clock size={22} />, title: "WATCH LIVE", description: "Tune in on Kick as the bonuses play out one by one.", color: "#60a5fa" },
     { icon: <Flame size={22} />, title: "CLOSEST WINS", description: "The guess closest to the actual ending balance wins!", color: "#f87171" },

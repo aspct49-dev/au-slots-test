@@ -259,7 +259,7 @@ export const reviews: SlotReview[] = [
     streamerTake:
       "Wanted Dead or Wild is THE slot for big bonus hunt results. I've had more memorable hits on this game than almost anything else. When the free spins kick in and the sticky wilds start stacking reels, the whole chat goes insane. There's no feeling quite like watching full-reel wilds multiply — absolute cinema.",
     finalVerdict:
-      "Wanted Dead or Wild is a masterpiece of slot design. It's volatile, cinematic, and rewards patience with some of the most spectacular wins in online slot history. A permanent fixture in our Points Shop for good reason — this is AUSlots royalty.",
+      "Wanted Dead or Wild is a masterpiece of slot design. It's volatile, cinematic, and rewards patience with some of the most spectacular wins in online slot history. A permanent fixture in our Points Shop for good reason — this is stream royalty.",
     gamingTips: [
       "Sticky wilds covering 3+ reels simultaneously is the dream trigger",
       "Free spins on higher bets compound wild multipliers dramatically",

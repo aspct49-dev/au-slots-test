@@ -10,7 +10,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-white font-bold text-base mb-3">1. Introduction</h2>
             <p>
-              TheAusOfficial / Auslots / Auslotsrewards (hereinafter referred to as &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting the privacy of its users. This Privacy Policy outlines how we collect, use, disclose, and safeguard your information when you visit our website{" "}
+              TheAusOfficial (hereinafter referred to as &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting the privacy of its users. This Privacy Policy outlines how we collect, use, disclose, and safeguard your information when you visit our website{" "}
               <span className="text-[#00ff87]/70">theausofficial.com</span> and use our services.
             </p>
           </section>

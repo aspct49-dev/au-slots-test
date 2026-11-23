@@ -16,10 +16,10 @@ export const metadata: Metadata = {
     template: "%s | TheAusOfficial",
   },
   description:
-    "Australia's #1 streaming rewards community. Earn points watching AUSlots live on Kick, enter raffles, and win prizes.",
-  keywords: ["auslots", "streaming rewards", "kick streamer", "slots", "casino", "australia", "bonus hunt", "free spins"],
-  authors: [{ name: "AUSlots" }],
-  creator: "AUSlots",
+    "A streaming rewards community. Earn points watching live on Kick, enter raffles, and win prizes.",
+  keywords: ["streaming rewards", "kick streamer", "slots", "bonus hunt", "free spins"],
+  authors: [{ name: "TheAusOfficial" }],
+  creator: "TheAusOfficial",
   robots: {
     index: true,
     follow: true,
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "TheAusOfficial — Stream. Earn. Win.",
-    description: "Australia's #1 streaming rewards community. Earn points watching AUSlots live on Kick, enter raffles, and win prizes.",
+    description: "A streaming rewards community. Earn points watching live on Kick, enter raffles, and win prizes.",
     type: "website",
     url: BASE_URL,
     siteName: "TheAusOfficial",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "TheAusOfficial — Stream. Earn. Win.",
-    description: "Australia's #1 streaming rewards community.",
+    description: "A streaming rewards community. Earn points, enter raffles, and win prizes.",
     images: ["/images/logo.png"],
   },
   alternates: {

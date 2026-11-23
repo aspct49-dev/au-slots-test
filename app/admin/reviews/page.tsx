@@ -127,7 +127,7 @@ function ReviewForm({
           <input className={inputCls} value={form.maxBet} onChange={(e) => set("maxBet", e.target.value)} placeholder="$100" />
         </div>
         <div>
-          <label className={labelCls}>AUSlots Rating (1–10)</label>
+          <label className={labelCls}>Our Rating (1–10)</label>
           <input type="number" step="0.1" min="1" max="10" className={inputCls} value={form.streamerRating} onChange={(e) => set("streamerRating", parseFloat(e.target.value))} />
         </div>
       </div>

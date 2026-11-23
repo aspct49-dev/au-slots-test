@@ -100,7 +100,7 @@ interface SiteSettings {
 
 const defaults: SiteSettings = {
   siteName: "TheAusOfficial",
-  heroTitle: "AUSLOTS REWARDS",
+  heroTitle: "EARN REWARDS",
   heroSubtitle: "Watch streams, earn points, redeem rewards.",
   liveNow: false,
   kickChannel: "auslots",

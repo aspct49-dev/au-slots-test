@@ -107,7 +107,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div>
             <p className="text-xs font-black tracking-widest text-white">{isAdmin ? "ADMIN" : "STREAMER"}</p>
-            <p className={`text-[10px] font-semibold ${isAdmin ? "text-[#00ff87]" : "text-[#a78bfa]"}`}>AUSlots Panel</p>
+            <p className={`text-[10px] font-semibold ${isAdmin ? "text-[#00ff87]" : "text-[#a78bfa]"}`}>Admin Panel</p>
           </div>
         </div>
 
@@ -180,7 +180,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </div>
                   <div>
                     <p className="text-xs font-black tracking-widest text-white">ADMIN</p>
-                    <p className="text-[10px] text-[#00ff87] font-semibold">AUSlots Panel</p>
+                    <p className="text-[10px] text-[#00ff87] font-semibold">Admin Panel</p>
                   </div>
                 </div>
                 <button onClick={() => setSidebarOpen(false)} className="text-white/40 hover:text-white">

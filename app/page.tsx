@@ -153,7 +153,7 @@ function HowItWorksSection() {
       step: "01",
       title: "WATCH THE STREAM",
       description:
-        "Tune into AUSlots live on Kick. Points are automatically added to your account while you watch.",
+        "Tune into the stream live on Kick. Points are automatically added to your account while you watch.",
       icon: <Monitor size={24} className="text-[#00ff87]" />,
     },
     {
@@ -234,7 +234,7 @@ function HowItWorksSection() {
               <div className="w-2 h-2 rounded-full bg-black" />
               <div className="absolute inset-0 rounded-full bg-black animate-ping opacity-50" />
             </div>
-            WATCH AUSLOTS LIVE
+            WATCH US LIVE
           </a>
         </motion.div>
       </div>

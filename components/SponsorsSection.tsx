@@ -13,7 +13,7 @@ const sponsors = [
     glowColor: "rgba(74,222,128,0.12)",
     borderColor: "rgba(74,222,128,0.18)",
     description:
-      "Zesty.Bet is a next generation online casino with instant deposits & withdrawals. Known for its transparent approach and wager free rewards.",
+      "Zesty.Bet is a next generation platform with instant deposits & withdrawals. Known for its transparent approach and wager free rewards.",
     features: [
       { icon: Gamepad2,   label: "10,000+ Games & Sportsbook" },
       { icon: Zap,        label: "Instant crypto deposits / withdrawals" },
@@ -29,12 +29,11 @@ const sponsors = [
     glowColor: "rgba(6,182,212,0.12)",
     borderColor: "rgba(6,182,212,0.18)",
     description:
-      "Viperspin is an online casino platform that offers FIAT & Crypto deposits / withdrawals with daily promotions. PayID deposits available from time to time.",
+      "Viperspin is a platform that offers FIAT & Crypto deposits / withdrawals with daily promotions.",
     features: [
       { icon: Gift,      label: "Daily Promotions" },
       { icon: Shield,    label: "Licensed & Secure" },
       { icon: CreditCard, label: "FIAT & Crypto payments" },
-      { icon: Zap,       label: "PayID deposits available" },
     ],
   },
 ];
@@ -64,7 +63,7 @@ export default function SponsorsSection() {
             CHECK OUT OUR SPONSORS
           </h2>
           <p className="text-white/40 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-            These platforms support AUSlots and make our rewards possible.
+            These platforms support us and make our rewards possible.
             Play responsibly — 18+ only.
           </p>
         </motion.div>

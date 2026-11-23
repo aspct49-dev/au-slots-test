@@ -135,7 +135,7 @@ function ReviewModal({
               {/* Dual ratings */}
               <div className="flex flex-wrap gap-6 mb-4">
                 <div>
-                  <p className="text-[11px] text-white/40 mb-1 tracking-widest">AUSLOTS RATING</p>
+                  <p className="text-[11px] text-white/40 mb-1 tracking-widest">OUR RATING</p>
                   <StarRow rating={review.streamerRating} size={16} />
                   <p className="text-sm font-bold text-amber-400 mt-1">
                     {review.streamerRating}/10
@@ -209,7 +209,7 @@ function ReviewModal({
               <section>
                 <h3 className="flex items-center gap-2 text-xs font-black tracking-widest text-white/60 uppercase mb-3 border-b border-white/[0.06] pb-2">
                   <Star size={13} className="text-[#00ff87]" />
-                  AUSlots&apos; Take
+                  Our Take
                 </h3>
                 <p className="text-sm text-white/70 leading-relaxed italic border-l-2 border-[#00ff87]/40 pl-4">
                   &ldquo;{review.streamerTake}&rdquo;
@@ -292,10 +292,10 @@ function ReviewModal({
                 </ul>
               </div>
 
-              {/* AUSlots rating summary */}
+              {/* Our rating summary */}
               <div className="bg-[#00ff87]/5 border border-[#00ff87]/10 rounded-xl p-4 text-center">
                 <p className="text-[11px] tracking-widest text-white/40 uppercase mb-2">
-                  AUSlots Score
+                  Our Score
                 </p>
                 <p className="text-4xl font-black text-[#00ff87]">
                   {review.streamerRating}
@@ -393,7 +393,7 @@ export default function ReviewsPage() {
             <span className="text-green-gradient">Reviews</span>
           </h1>
           <p className="text-white/40 text-sm max-w-md mx-auto">
-            Every slot reviewed and rated by AUSlots — RTP, volatility, features, and the real talk.
+            Every slot reviewed and rated — RTP, volatility, features, and the real talk.
           </p>
         </motion.div>
 
