@@ -76,7 +76,7 @@ const socials = [
 
 export default function SocialLinks() {
   return (
-    <section className="py-12 sm:py-20 relative">
+    <section className="py-12 sm:py-16 relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(0,255,135,0.03)_0%,transparent_70%)]" />
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8 relative z-10">
         {/* Header */}
@@ -94,13 +94,13 @@ export default function SocialLinks() {
             </span>
           </div>
           <BubbleText className="text-3xl sm:text-4xl tracking-tight text-[#00ff87]/60 mb-3">{"JOIN THE COMMUNITY"}</BubbleText>
-          <p className="text-white/50 text-sm max-w-md mx-auto">
+          <p className="text-white/50 text-sm max-w-md mx-auto text-balance">
             Follow us across all platforms and never miss a stream, giveaway or announcement.
           </p>
         </motion.div>
 
-        {/* Social cards grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {/* Social cards — flex-wrap so an odd last row stays centered */}
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl mx-auto [&>*]:w-[calc(50%-0.375rem)] sm:[&>*]:w-[calc(33.333%-0.667rem)] lg:[&>*]:w-[calc(20%-0.8rem)]">
           {socials.map((social, index) => (
             <motion.a
               key={social.name}

@@ -120,7 +120,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
+    <section className="relative flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
       {/* Animated gradient bg */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(0,255,135,0.12)_0%,transparent_60%)]" />
@@ -142,7 +142,7 @@ export default function HeroSection() {
       />
 
       {/* Content */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-8 pt-24 sm:pt-32 pb-12 sm:pb-20 text-center">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 lg:px-8 pt-28 sm:pt-40 pb-10 sm:pb-16 text-center">
         {/* Main headline */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -194,7 +194,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
-          className="mt-12 sm:mt-20 grid grid-cols-2 md:grid-cols-4 rounded-2xl overflow-hidden"
+          className="mt-12 sm:mt-16 grid grid-cols-2 md:grid-cols-4 rounded-2xl overflow-hidden max-w-4xl mx-auto"
         >
           {stats.map((stat) => (
             <div

@@ -40,7 +40,7 @@ const sponsors = [
 
 export default function SponsorsSection() {
   return (
-    <section className="py-14 sm:py-24 relative">
+    <section className="py-12 sm:py-16 relative">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 rounded-full bg-[#4ade80]/4 blur-3xl" />
         <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 rounded-full bg-[#06b6d4]/4 blur-3xl" />
@@ -53,7 +53,7 @@ export default function SponsorsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12 sm:mb-16"
+          className="text-center mb-10 sm:mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 mb-5">
             <Star size={12} className="text-[#00ff87]" />
@@ -62,7 +62,7 @@ export default function SponsorsSection() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-4">
             CHECK OUT OUR SPONSORS
           </h2>
-          <p className="text-white/40 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
+          <p className="text-white/40 text-sm sm:text-base max-w-md mx-auto leading-relaxed text-balance">
             These platforms support us and make our rewards possible.
             Play responsibly — 18+ only.
           </p>
@@ -166,7 +166,7 @@ export default function SponsorsSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center text-white/20 text-xs mt-10 max-w-md mx-auto"
+          className="text-center text-white/25 text-xs mt-8 max-w-lg mx-auto text-balance"
         >
           Sponsored content. Gambling can be addictive — please play responsibly. Must be 18+.
         </motion.p>

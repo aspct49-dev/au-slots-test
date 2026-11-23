@@ -62,7 +62,7 @@ const features = [
 
 function FeaturesSection() {
   return (
-    <section className="py-14 sm:py-24 relative">
+    <section className="py-12 sm:py-16 relative">
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8 relative z-10">
         {/* Header */}
         <motion.div
@@ -70,7 +70,7 @@ function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-10 sm:mb-16"
+          className="text-center mb-10 sm:mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00ff87]/10 border border-[#00ff87]/20 mb-4">
             <Star size={12} className="text-[#00ff87]" />
@@ -82,14 +82,14 @@ function FeaturesSection() {
             EVERYTHING YOU NEED
             <BubbleText className="text-3xl sm:text-4xl lg:text-5xl tracking-tight text-[#00ff87]/60">{"TO WIN BIG"}</BubbleText>
           </div>
-          <p className="text-white/50 text-base max-w-lg mx-auto leading-relaxed">
+          <p className="text-white/50 text-base max-w-lg mx-auto leading-relaxed text-balance">
             TheAusOfficial is packed with ways to earn, compete,
             and win. All for free — just tune in.
           </p>
         </motion.div>
 
         {/* Features grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -132,7 +132,7 @@ function FeaturesSection() {
 
                 {/* Arrow */}
                 <div
-                  className="relative z-10 flex items-center gap-1 mt-4 text-xs font-bold tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0"
+                  className="relative z-10 flex items-center gap-1 mt-4 text-xs font-bold tracking-wider opacity-60 group-hover:opacity-100 transition-all duration-200 group-hover:gap-2"
                   style={{ color: feature.color }}
                 >
                   EXPLORE
@@ -173,22 +173,20 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section className="py-14 sm:py-20">
+    <section className="py-12 sm:py-16">
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-10 sm:mb-16"
+          className="text-center mb-10 sm:mb-12"
         >
           <BubbleText className="text-3xl sm:text-4xl tracking-tight text-[#00ff87]/60 mb-3">{"HOW IT WORKS"}</BubbleText>
           <p className="text-white/40 text-sm">Simple, free, and rewarding.</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8 relative">
-
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {steps.map((step, index) => (
             <motion.div
               key={step.step}
@@ -222,7 +220,7 @@ function HowItWorksSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-center mt-12"
+          className="text-center mt-10"
         >
           <a
             href="https://kick.com/auslots"
@@ -257,21 +255,21 @@ const videos = [
 
 function VideoTutorialsSection() {
   return (
-    <section className="py-14 sm:py-20">
+    <section className="py-12 sm:py-16">
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-10"
+          className="text-center mb-8"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
             <span className="text-white/60 text-xs font-bold tracking-widest">• VIDEO TUTORIALS •</span>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
           {videos.map((video, i) => (
             <motion.a
               key={video.title}

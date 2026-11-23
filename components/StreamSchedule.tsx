@@ -132,7 +132,7 @@ export default function StreamSchedule() {
   const mobileEntry = week.find((e) => e.date === mobileDay);
 
   return (
-    <section className="py-12 sm:py-20 relative" id="schedule">
+    <section className="py-12 sm:py-16 relative scroll-mt-16" id="schedule">
       <div className="max-w-[1100px] mx-auto px-4 lg:px-8">
         {/* ── Header ────────────────────────────────── */}
         <motion.div
