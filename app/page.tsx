@@ -19,7 +19,6 @@ import HeroSection from "@/components/HeroSection";
 import { BubbleText } from "@/components/ui/bubble-text";
 import StreamSchedule from "@/components/StreamSchedule";
 import SocialLinks from "@/components/SocialLinks";
-import SponsorsSection from "@/components/SponsorsSection";
 
 const features = [
   {
@@ -360,7 +359,6 @@ export default function HomePage() {
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
-      <SponsorsSection />
       <StreamSchedule />
       <VideoTutorialsSection />
       <SocialLinks />
